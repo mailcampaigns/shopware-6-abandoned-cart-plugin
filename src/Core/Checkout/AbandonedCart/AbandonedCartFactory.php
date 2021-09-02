@@ -5,8 +5,6 @@ namespace MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart;
 use MailCampaigns\AbandonedCart\Exception\InvalidCartDataException;
 use MailCampaigns\AbandonedCart\Exception\MissingCartDataException;
 use Shopware\Core\Checkout\Cart\Cart;
-use Shopware\Core\Checkout\Cart\LineItem\LineItem;
-use Shopware\Core\Checkout\Cart\LineItem\LineItemCollection;
 
 /**
  * @author Twan Haverkamp <twan@mailcampaigns.nl>
