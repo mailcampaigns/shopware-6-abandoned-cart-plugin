@@ -1,7 +1,6 @@
 {
     "name": "mailcampaigns/shopware-6-abandoned-cart-plugin",
-    "description": "A Shopware 6 plugin for reading \"abandoned\" cart entities.",
-    "version": "1.0.0",
+    "description": "A Shopware 6 plugin for \"abandoned\" carts.",
     "type": "shopware-platform-plugin",
     "license": "MIT",
     "authors": [
@@ -18,10 +17,10 @@
         "shopware-plugin-class": "MailCampaigns\\AbandonedCart\\MailCampaignsAbandonedCart",
         "plugin-icon": "src/Resources/config/plugin.png",
         "label": {
-            "en-GB": "MailCampaigns - \"Abandoned\" Cart"
+            "en-GB": "MailCampaigns - \"Abandoned\" cart"
         },
         "description": {
-            "en-GB": "Read \"abandoned\" cart entities."
+            "en-GB": "CRUD operations for \"abandoned\" carts."
         }
     },
     "autoload": {
