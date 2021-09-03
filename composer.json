@@ -5,9 +5,7 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "Twan Haverkamp",
-            "email": "twan@mailcampaigns.nl",
-            "role": "Developer"
+            "name": "MailCampaigns"
         }
     ],
     "require": {
