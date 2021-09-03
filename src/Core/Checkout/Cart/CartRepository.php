@@ -37,14 +37,20 @@ SELECT
     `cart`.`token`,
     `cart`.`cart`,
     `cart`.`price`,
-    `cart`.`line_item_count`,
-    BIN_TO_UUID(`cart`.`currency_id`) AS `currency_id`,
-    BIN_TO_UUID(`cart`.`shipping_method_id`) AS `shipping_method_id`,
-    BIN_TO_UUID(`cart`.`payment_method_id`) AS `payment_method_id`,
-    BIN_TO_UUID(`cart`.`country_id`) AS `country_id`,
-    BIN_TO_UUID(`cart`.`customer_id`) AS `customer_id`,
-    BIN_TO_UUID(`cart`.`sales_channel_id`) AS `sales_channel_id`,
-    `cart`.`created_at`
+    LOWER(CONCAT(
+        LEFT(HEX(`cart`.`customer_id`), 8), '-',
+        MID(HEX(`cart`.`customer_id`), 9, 4), '-',
+        MID(HEX(`cart`.`customer_id`), 13, 4), '-',
+        MID(HEX(`cart`.`customer_id`), 17, 4), '-',
+        RIGHT(HEX(`cart`.`customer_id`), 12)
+    )) AS `customer_id`,
+    LOWER(CONCAT(
+        LEFT(HEX(`cart`.`sales_channel_id`), 8), '-',
+        MID(HEX(`cart`.`sales_channel_id`), 9, 4), '-',
+        MID(HEX(`cart`.`sales_channel_id`), 13, 4), '-',
+        MID(HEX(`cart`.`sales_channel_id`), 17, 4), '-',
+        RIGHT(HEX(`cart`.`sales_channel_id`), 12)
+    )) AS `sales_channel_id`
 FROM `cart`
 
 JOIN `customer` ON `cart`.`customer_id` = `customer`.`id`
