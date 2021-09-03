@@ -18,7 +18,7 @@ After installation, this plugin still needs to be activated. This can be done vi
 (**Extensions > My extensions**) or by running the following command:
 
 ```bash
-$ bin/console plugin:activate
+$ bin/console plugin:activate MailCampaignsAbandonedCart
 ```
 
 ### Configuration
