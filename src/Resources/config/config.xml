@@ -4,6 +4,7 @@
 
     <card>
         <title>Abandoned cart settings</title>
+
         <input-field type="int">
             <name>markAbandonedAfter</name>
             <label>After how many seconds is a cart considered "abandoned"?</label>
