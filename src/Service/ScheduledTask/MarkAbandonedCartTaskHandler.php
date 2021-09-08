@@ -4,7 +4,6 @@ namespace MailCampaigns\AbandonedCart\Service\ScheduledTask;
 
 use MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartFactory;
 use MailCampaigns\AbandonedCart\Core\Checkout\Cart\CartRepository;
-use Ramsey\Uuid\Uuid;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
 use Shopware\Core\Framework\MessageQueue\ScheduledTask\ScheduledTaskHandler;
@@ -47,8 +46,8 @@ class MarkAbandonedCartTaskHandler extends ScheduledTaskHandler
                     'cartToken' => $abandonedCart->getCartToken(),
                     'price' => $abandonedCart->getPrice(),
                     'lineItems' => $abandonedCart->getLineItems(),
-                    'customerId' => Uuid::fromString($abandonedCart->getCustomerId())->getHex(),
-                    'salesChannelId' => Uuid::fromString($abandonedCart->getSalesChannelId())->getHex(),
+                    'customerId' => $abandonedCart->getCustomerId(),
+                    'salesChannelId' => $abandonedCart->getSalesChannelId(),
                 ],
             ], Context::createDefaultContext());
         }
