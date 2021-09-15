@@ -34,7 +34,7 @@ class DeleteAbandonedCartTaskHandler extends ScheduledTaskHandler
      */
     public static function getHandledMessages(): iterable
     {
-        yield MarkAbandonedCartTask::class;
+        yield DeleteAbandonedCartTask::class;
     }
 
     public function run(): void
