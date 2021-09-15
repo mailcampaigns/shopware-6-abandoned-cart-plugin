@@ -68,4 +68,28 @@ SQL;
 
         return $statement->fetchAllAssociative();
     }
+
+    /**
+     * Returns an array of `cart` tokens which no longer exists but still has an `abandoned_cart` association.
+     */
+    public function findDeletedTokensWithAbandonedCartAssociation(): array
+    {
+        $sql = <<<SQL
+SELECT
+    `abandoned_cart`.`cart_token` AS `token`
+FROM `abandoned_cart`
+
+LEFT JOIN `cart` ON `abandoned_cart`.`cart_token` = `cart`.`token`
+
+WHERE `cart`.`token` IS NULL;
+SQL;
+
+        $statement = $this->connection->prepare($sql);
+        $statement->execute();
+
+        return array_column(
+            $statement->fetchAllAssociative(),
+            'token'
+        );
+    }
 }
