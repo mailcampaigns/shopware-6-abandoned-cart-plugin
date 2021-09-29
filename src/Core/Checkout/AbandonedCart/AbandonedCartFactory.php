@@ -14,7 +14,7 @@ class AbandonedCartFactory
     /**
      * @var string[]
      */
-    private static array $requiredValues = [
+    private static $requiredValues = [
         'token',
         'price',
         'cart',

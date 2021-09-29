@@ -14,9 +14,15 @@ use Shopware\Core\Framework\MessageQueue\ScheduledTask\ScheduledTaskHandler;
  */
 class DeleteAbandonedCartTaskHandler extends ScheduledTaskHandler
 {
-    private CartRepository $cartRepository;
+    /**
+     * @var CartRepository
+     */
+    private $cartRepository;
 
-    private EntityRepositoryInterface $abandonedCartRepository;
+    /**
+     * @var EntityRepositoryInterface
+     */
+    private $abandonedCartRepository;
 
     public function __construct(
         CartRepository $cartRepository,

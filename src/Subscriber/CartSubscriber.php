@@ -15,7 +15,10 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 class CartSubscriber implements EventSubscriberInterface
 {
-    private EntityRepositoryInterface $abandonedCartRepository;
+    /**
+     * @var EntityRepositoryInterface
+     */
+    private $abandonedCartRepository;
 
     public function __construct(EntityRepositoryInterface $abandonedCartRepository)
     {

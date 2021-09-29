@@ -10,9 +10,15 @@ use Shopware\Core\System\SystemConfig\SystemConfigService;
  */
 class CartRepository
 {
-    private Connection $connection;
+    /**
+     * @var Connection
+     */
+    private $connection;
 
-    private SystemConfigService $systemConfigService;
+    /**
+     * @var SystemConfigService
+     */
+    private $systemConfigService;
 
     public function __construct(
         Connection $connection,
