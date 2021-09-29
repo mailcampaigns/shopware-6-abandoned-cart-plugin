@@ -49,7 +49,12 @@ CREATE TABLE IF NOT EXISTS `abandoned_cart` (
     DEFAULT CHARSET = utf8mb4
     COLLATE = utf8mb4_unicode_ci;
 SQL;
-        $connection->executeStatement($sql);
+
+        if (method_exists($connection, 'executeStatement') === true) {
+            $connection->executeStatement($sql);
+        } else {
+            $connection->exec($sql);
+        }
     }
 
     /**
