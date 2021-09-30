@@ -76,16 +76,23 @@ SQL;
     }
 
     /**
-     * Returns an array of `cart` tokens which no longer exists but still has an `abandoned_cart` association.
+     * Returns an array of `cart` tokens which no longer exists or considered as "abandoned"
+     * but still has an `abandoned_cart` association.
      */
-    public function findDeletedTokensWithAbandonedCartAssociation(): array
+    public function findTokensForUpdatedOrDeletedWithAbandonedCartAssociation(): array
     {
+        $considerAbandonedAfter = (new \DateTime())->modify(sprintf(
+            '-%d seconds',
+            $this->systemConfigService->get('MailCampaignsAbandonedCart.config.markAbandonedAfter')
+        ));
+
         $sql = <<<SQL
 SELECT
     `abandoned_cart`.`cart_token` AS `token`
 FROM `abandoned_cart`
 
 LEFT JOIN `cart` ON `abandoned_cart`.`cart_token` = `cart`.`token`
+    AND `cart`.`created_at` < '{$considerAbandonedAfter->format('Y-m-d H:i:s.v')}'
 
 WHERE `cart`.`token` IS NULL;
 SQL;

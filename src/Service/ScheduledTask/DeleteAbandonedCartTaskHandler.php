@@ -45,7 +45,7 @@ class DeleteAbandonedCartTaskHandler extends ScheduledTaskHandler
 
     public function run(): void
     {
-        foreach ($this->cartRepository->findDeletedTokensWithAbandonedCartAssociation() as $token) {
+        foreach ($this->cartRepository->findTokensForUpdatedOrDeletedWithAbandonedCartAssociation() as $token) {
             $abandonedCartId = $this->findAbandonedCartIdByToken($token);
 
             if ($abandonedCartId !== null) {
