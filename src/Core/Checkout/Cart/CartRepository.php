@@ -3,6 +3,7 @@
 namespace MailCampaigns\AbandonedCart\Core\Checkout\Cart;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\FetchMode;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 
 /**
@@ -72,7 +73,7 @@ SQL;
         $statement = $this->connection->prepare($sql);
         $statement->execute();
 
-        return $statement->fetchAllAssociative();
+        return $statement->fetchAll(FetchMode::ASSOCIATIVE);
     }
 
     /**
@@ -101,7 +102,7 @@ SQL;
         $statement->execute();
 
         return array_column(
-            $statement->fetchAllAssociative(),
+            $statement->fetchAll(FetchMode::ASSOCIATIVE),
             'token'
         );
     }
