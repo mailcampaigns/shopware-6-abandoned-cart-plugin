@@ -39,22 +39,14 @@ CREATE TABLE IF NOT EXISTS `abandoned_cart` (
     PRIMARY KEY (`id`),
     UNIQUE KEY (`cart_token`),
     INDEX (`customer_id`),
-    INDEX (`sales_channel_id`),
-    FOREIGN KEY (`customer_id`)
-        REFERENCES customer(`id`),
-    FOREIGN KEY (`sales_channel_id`)
-        REFERENCES sales_channel(`id`)
+    INDEX (`sales_channel_id`)
 )
     ENGINE = InnoDB
     DEFAULT CHARSET = utf8mb4
     COLLATE = utf8mb4_unicode_ci;
 SQL;
 
-        if (method_exists($connection, 'executeStatement') === true) {
-            $connection->executeStatement($sql);
-        } else {
-            $connection->exec($sql);
-        }
+        $connection->exec($sql);
     }
 
     /**
@@ -62,5 +54,10 @@ SQL;
      */
     public function updateDestructive(Connection $connection): void
     {
+        $sql = <<<SQL
+DROP TABLE IF EXISTS `abandoned_cart`;
+SQL;
+
+        $connection->exec($sql);
     }
 }
