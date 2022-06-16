@@ -9,6 +9,7 @@
         }
     ],
     "require": {
+        "ext-json": "*",
         "shopware/core": "6.4.*"
     },
     "extra": {

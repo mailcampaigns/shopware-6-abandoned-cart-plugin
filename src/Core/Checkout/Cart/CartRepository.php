@@ -3,7 +3,6 @@
 namespace MailCampaigns\AbandonedCart\Core\Checkout\Cart;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\FetchMode;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 
 /**
@@ -39,41 +38,40 @@ class CartRepository
             $this->systemConfigService->get('MailCampaignsAbandonedCart.config.markAbandonedAfter')
         ));
 
-        $sql = <<<SQL
-SELECT
-    `cart`.`token`,
-    `cart`.`name`,
-    `cart`.`cart`,
-    `cart`.`price`,
-    `cart`.`line_item_count`,
-    LOWER(HEX(`cart`.`currency_id`)) AS `currency_id`,
-    LOWER(HEX(`cart`.`shipping_method_id`)) AS `shipping_method_id`,
-    LOWER(HEX(`cart`.`payment_method_id`)) AS `payment_method_id`,
-    LOWER(HEX(`cart`.`country_id`)) AS `country_id`,
-    LOWER(HEX(`cart`.`customer_id`)) AS `customer_id`,
-    LOWER(HEX(`cart`.`sales_channel_id`)) AS `sales_channel_id`,
-    `cart`.`created_at`
-FROM `cart`
+        $statement = $this->connection->prepare(<<<SQL
+            SELECT
+                `cart`.`token`,
+                `cart`.`name`,
+                `cart`.`cart`,
+                `cart`.`price`,
+                `cart`.`line_item_count`,
+                LOWER(HEX(`cart`.`currency_id`)) AS `currency_id`,
+                LOWER(HEX(`cart`.`shipping_method_id`)) AS `shipping_method_id`,
+                LOWER(HEX(`cart`.`payment_method_id`)) AS `payment_method_id`,
+                LOWER(HEX(`cart`.`country_id`)) AS `country_id`,
+                LOWER(HEX(`cart`.`customer_id`)) AS `customer_id`,
+                LOWER(HEX(`cart`.`sales_channel_id`)) AS `sales_channel_id`,
+                `cart`.`created_at`
+            FROM `cart`
 
-JOIN `customer` ON `cart`.`customer_id` = `customer`.`id`
-    AND `cart`.`sales_channel_id` = `customer`.`sales_channel_id`
-    AND `customer`.`active` = 1
+            JOIN `customer` ON `cart`.`customer_id` = `customer`.`id`
+                AND `cart`.`sales_channel_id` = `customer`.`sales_channel_id`
+                AND `customer`.`active` = 1
 
-LEFT JOIN `abandoned_cart` ON `cart`.`token` = `abandoned_cart`.`cart_token`
-    AND `cart`.`sales_channel_id` = `abandoned_cart`.`sales_channel_id`
+            LEFT JOIN `abandoned_cart` ON `cart`.`token` = `abandoned_cart`.`cart_token`
+                AND `cart`.`sales_channel_id` = `abandoned_cart`.`sales_channel_id`
 
-WHERE `abandoned_cart`.`id` IS NULL
-AND `cart`.`customer_id` IS NOT NULL
-AND `cart`.`created_at` < '{$markAbandonedAfter->format('Y-m-d H:i:s.v')}'
+            WHERE `abandoned_cart`.`id` IS NULL
+            AND `cart`.`customer_id` IS NOT NULL
+            AND `cart`.`created_at` < '{$markAbandonedAfter->format('Y-m-d H:i:s.v')}'
 
-ORDER BY `cart`.`created_at`
-LIMIT 100;
-SQL;
+            ORDER BY `cart`.`created_at`
+            LIMIT 100;
+        SQL);
 
-        $statement = $this->connection->prepare($sql);
-        $statement->execute();
-
-        return $statement->fetchAll(FetchMode::ASSOCIATIVE);
+        return $statement
+            ->executeQuery()
+            ->fetchAssociative();
     }
 
     /**
@@ -87,22 +85,19 @@ SQL;
             $this->systemConfigService->get('MailCampaignsAbandonedCart.config.markAbandonedAfter')
         ));
 
-        $sql = <<<SQL
-SELECT
-    `abandoned_cart`.`cart_token` AS `token`
-FROM `abandoned_cart`
+        $statement = $this->connection->prepare(<<<SQL
+            SELECT
+                `abandoned_cart`.`cart_token` AS `token`
+            FROM `abandoned_cart`
 
-LEFT JOIN `cart` ON `abandoned_cart`.`cart_token` = `cart`.`token`
-    AND `cart`.`created_at` < '{$considerAbandonedAfter->format('Y-m-d H:i:s.v')}'
+            LEFT JOIN `cart` ON `abandoned_cart`.`cart_token` = `cart`.`token`
+                AND `cart`.`created_at` < '{$considerAbandonedAfter->format('Y-m-d H:i:s.v')}'
 
-WHERE `cart`.`token` IS NULL;
-SQL;
-
-        $statement = $this->connection->prepare($sql);
-        $statement->execute();
+            WHERE `cart`.`token` IS NULL;
+        SQL);
 
         return array_column(
-            $statement->fetchAll(FetchMode::ASSOCIATIVE),
+            $statement->executeQuery()->fetchAssociative(),
             'token'
         );
     }
