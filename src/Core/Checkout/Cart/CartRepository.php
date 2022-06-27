@@ -42,7 +42,7 @@ class CartRepository
             SELECT
                 `cart`.`token`,
                 `cart`.`name`,
-                `cart`.`cart`,
+                `cart`.`payload`,
                 `cart`.`price`,
                 `cart`.`line_item_count`,
                 LOWER(HEX(`cart`.`currency_id`)) AS `currency_id`,
@@ -71,7 +71,7 @@ class CartRepository
 
         return $statement
             ->executeQuery()
-            ->fetchAssociative();
+            ->fetchAllAssociative();
     }
 
     /**
@@ -97,7 +97,7 @@ class CartRepository
         SQL);
 
         return array_column(
-            $statement->executeQuery()->fetchAssociative(),
+            $statement->executeQuery()->fetchAllAssociative(),
             'token'
         );
     }
