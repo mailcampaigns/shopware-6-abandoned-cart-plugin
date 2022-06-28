@@ -42,7 +42,7 @@ class CartRepository
             SELECT
                 `cart`.`token`,
                 `cart`.`name`,
-                `cart`.`payload`,
+                `cart`.`cart`,
                 `cart`.`price`,
                 `cart`.`line_item_count`,
                 LOWER(HEX(`cart`.`currency_id`)) AS `currency_id`,

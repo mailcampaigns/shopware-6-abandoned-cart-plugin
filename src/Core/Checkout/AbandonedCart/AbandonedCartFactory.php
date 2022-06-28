@@ -17,7 +17,7 @@ class AbandonedCartFactory
     private static $requiredValues = [
         'token',
         'price',
-        'payload',
+        'cart',
         'customer_id',
         'sales_channel_id',
     ];
@@ -30,7 +30,7 @@ class AbandonedCartFactory
     {
         self::validateData($data);
 
-        $cart = unserialize($data['payload']);
+        $cart = unserialize($data['cart']);
 
         if (!$cart instanceof Cart) {
             throw new InvalidCartDataException('cart', Cart::class, $cart);
