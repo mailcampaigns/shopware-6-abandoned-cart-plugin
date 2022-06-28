@@ -17,7 +17,7 @@ class AbandonedCartFactory
     private static $requiredValues = [
         'token',
         'price',
-        'cart',
+        'payload',
         'customer_id',
         'sales_channel_id',
     ];
@@ -30,7 +30,7 @@ class AbandonedCartFactory
     {
         self::validateData($data);
 
-        $cart = unserialize($data['cart']);
+        $cart = unserialize($data['payload']);
 
         if (!$cart instanceof Cart) {
             throw new InvalidCartDataException('cart', Cart::class, $cart);
@@ -49,9 +49,11 @@ class AbandonedCartFactory
     /**
      * @throws MissingCartDataException if a required value is missing.
      */
-    private static function validateData(array $data): void
+    private static function validateData(array $data, string $cartField = 'cart'): void
     {
-        foreach (self::$requiredValues as $requiredValue) {
+        $requiredValues = array_merge(self::$requiredValues, [$cartField]);
+
+        foreach ($requiredValues as $requiredValue) {
             if (array_key_exists($requiredValue, $data) === false) {
                 throw new MissingCartDataException($requiredValue);
             }

@@ -38,11 +38,12 @@ class CartRepository
             $this->systemConfigService->get('MailCampaignsAbandonedCart.config.markAbandonedAfter')
         ));
 
+        $field = $this->payloadExists() ? 'payload' : 'cart';
         $statement = $this->connection->prepare(<<<SQL
             SELECT
                 `cart`.`token`,
                 `cart`.`name`,
-                `cart`.`cart`,
+                `cart`.`$field` AS payload,
                 `cart`.`price`,
                 `cart`.`line_item_count`,
                 LOWER(HEX(`cart`.`currency_id`)) AS `currency_id`,
@@ -100,5 +101,20 @@ class CartRepository
             $statement->executeQuery()->fetchAllAssociative(),
             'token'
         );
+    }
+
+    /**
+     * Can be used for backwards compatibility fixes for < Shopware 6.4.12.
+     */
+    private function payloadExists(): bool
+    {
+        $statement = $this->connection->prepare(<<<SQL
+            SHOW COLUMNS FROM cart;
+        SQL);
+
+        return in_array('payload', array_column(
+            $statement->executeQuery()->fetchAllAssociative(),
+            'Field'
+        ));
     }
 }
