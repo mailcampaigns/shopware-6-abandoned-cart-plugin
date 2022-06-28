@@ -49,11 +49,9 @@ class AbandonedCartFactory
     /**
      * @throws MissingCartDataException if a required value is missing.
      */
-    private static function validateData(array $data, string $cartField = 'cart'): void
+    private static function validateData(array $data): void
     {
-        $requiredValues = array_merge(self::$requiredValues, [$cartField]);
-
-        foreach ($requiredValues as $requiredValue) {
+        foreach (self::$requiredValues as $requiredValue) {
             if (array_key_exists($requiredValue, $data) === false) {
                 throw new MissingCartDataException($requiredValue);
             }
