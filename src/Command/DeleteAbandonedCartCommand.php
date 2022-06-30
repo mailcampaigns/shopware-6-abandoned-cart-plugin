@@ -13,7 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class DeleteAbandonedCartCommand extends Command
 {
     protected static $defaultName = 'mailcampaigns:abandoned-cart:delete';
-    protected static $defaultDescription = 'Deletes "abandoned" carts without an existing reference';
+    protected static $defaultDescription = 'Deletes "abandoned" carts without an existing reference.';
 
     private AbandonedCartManager $manager;
 
