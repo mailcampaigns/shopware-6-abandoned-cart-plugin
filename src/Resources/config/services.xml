@@ -20,10 +20,12 @@
 
         <service id="MailCampaigns\AbandonedCart\Command\DeleteAbandonedCartCommand">
             <argument type="service" id="MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager" />
+            <tag name="console.command"/>
         </service>
 
         <service id="MailCampaigns\AbandonedCart\Command\MarkAbandonedCartCommand">
             <argument type="service" id="MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager" />
+            <tag name="console.command"/>
         </service>
 
         <service id="MailCampaigns\AbandonedCart\Service\ScheduledTask\DeleteAbandonedCartTask">
