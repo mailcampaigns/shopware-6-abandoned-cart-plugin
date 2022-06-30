@@ -34,7 +34,7 @@ class AbandonedCartManager
         foreach ($this->cartRepository->findMarkableAsAbandoned() as $cart) {
             $abandonedCart = AbandonedCartFactory::createFromArray($cart);
 
-            $this->abandonedCartRepository->create([
+            $this->abandonedCartRepository->upsert([
                 [
                     'cartToken' => $abandonedCart->getCartToken(),
                     'price' => $abandonedCart->getPrice(),
