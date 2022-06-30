@@ -15,50 +15,13 @@ class AbandonedCartEntity extends Entity
 {
     use EntityIdTrait;
 
-    /**
-     * @var string
-     */
-    protected $cartToken;
-
-    /**
-     * @var float
-     */
-    protected $price;
-
-    /**
-     * @var string
-     */
-    protected $lineItems;
-
-    /**
-     * @var string
-     */
-    protected $customerId;
-
-    /**
-     * @var string
-     */
-    protected $salesChannelId;
-
-    /**
-     * @var DateTimeInterface
-     */
-    protected $createdAt;
-
-    /**
-     * @var DateTimeInterface|null
-     */
-    protected $updatedAt;
-
-    /**
-     * @var CustomerEntity|null
-     */
-    protected $customer;
-
-    /**
-     * @var SalesChannelEntity|null
-     */
-    protected $salesChannel;
+    protected string $cartToken;
+    protected float $price;
+    protected string $lineItems;
+    protected string $customerId;
+    protected string $salesChannelId;
+    protected ?CustomerEntity $customer;
+    protected ?SalesChannelEntity $salesChannel;
 
     public function getCartToken(): string
     {
@@ -108,26 +71,6 @@ class AbandonedCartEntity extends Entity
     public function setSalesChannelId(string $salesChannelId): void
     {
         $this->salesChannelId = $salesChannelId;
-    }
-
-    public function getCreatedAt(): DateTimeInterface
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(DateTimeInterface $createdAt): void
-    {
-        $this->createdAt = $createdAt;
-    }
-
-    public function getUpdatedAt(): ?DateTimeInterface
-    {
-        return $this->updatedAt;
-    }
-
-    public function setUpdatedAt(?DateTimeInterface $updatedAt): void
-    {
-        $this->updatedAt = $updatedAt;
     }
 
     public function getCustomer(): ?CustomerEntity

@@ -2,9 +2,7 @@
 
 namespace MailCampaigns\AbandonedCart\Service\ScheduledTask;
 
-use MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartFactory;
-use MailCampaigns\AbandonedCart\Core\Checkout\Cart\CartRepository;
-use Shopware\Core\Framework\Context;
+use MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
 use Shopware\Core\Framework\MessageQueue\ScheduledTask\ScheduledTaskHandler;
 
@@ -13,23 +11,12 @@ use Shopware\Core\Framework\MessageQueue\ScheduledTask\ScheduledTaskHandler;
  */
 class MarkAbandonedCartTaskHandler extends ScheduledTaskHandler
 {
-    /**
-     * @var CartRepository
-     */
-    private $cartRepository;
+    private AbandonedCartManager $manager;
+    private EntityRepositoryInterface $abandonedCartRepository;
 
-    /**
-     * @var EntityRepositoryInterface
-     */
-    private $abandonedCartRepository;
-
-    public function __construct(
-        CartRepository $cartRepository,
-        EntityRepositoryInterface $abandonedCartRepository,
-        EntityRepositoryInterface $scheduledTaskRepository
-    ) {
-        $this->cartRepository = $cartRepository;
-        $this->abandonedCartRepository = $abandonedCartRepository;
+    public function __construct(AbandonedCartManager $manager, EntityRepositoryInterface $scheduledTaskRepository)
+    {
+        $this->manager = $manager;
 
         parent::__construct($scheduledTaskRepository);
     }
@@ -44,18 +31,6 @@ class MarkAbandonedCartTaskHandler extends ScheduledTaskHandler
 
     public function run(): void
     {
-        foreach ($this->cartRepository->findMarkableAsAbandoned() as $cart) {
-            $abandonedCart = AbandonedCartFactory::createFromArray($cart);
-
-            $this->abandonedCartRepository->create([
-                [
-                    'cartToken' => $abandonedCart->getCartToken(),
-                    'price' => $abandonedCart->getPrice(),
-                    'lineItems' => $abandonedCart->getLineItems(),
-                    'customerId' => $abandonedCart->getCustomerId(),
-                    'salesChannelId' => $abandonedCart->getSalesChannelId(),
-                ],
-            ], Context::createDefaultContext());
-        }
+        $this->manager->generate();
     }
 }

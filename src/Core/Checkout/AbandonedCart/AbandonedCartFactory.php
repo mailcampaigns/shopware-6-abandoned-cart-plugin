@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart;
 
@@ -14,7 +14,7 @@ class AbandonedCartFactory
     /**
      * @var string[]
      */
-    private static $requiredValues = [
+    private static array $requiredValues = [
         'token',
         'price',
         'payload',

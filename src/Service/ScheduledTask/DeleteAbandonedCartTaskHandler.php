@@ -2,11 +2,8 @@
 
 namespace MailCampaigns\AbandonedCart\Service\ScheduledTask;
 
-use MailCampaigns\AbandonedCart\Core\Checkout\Cart\CartRepository;
-use Shopware\Core\Framework\Context;
+use MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\MessageQueue\ScheduledTask\ScheduledTaskHandler;
 
 /**
@@ -14,23 +11,12 @@ use Shopware\Core\Framework\MessageQueue\ScheduledTask\ScheduledTaskHandler;
  */
 class DeleteAbandonedCartTaskHandler extends ScheduledTaskHandler
 {
-    /**
-     * @var CartRepository
-     */
-    private $cartRepository;
+    private AbandonedCartManager $manager;
+    private EntityRepositoryInterface $abandonedCartRepository;
 
-    /**
-     * @var EntityRepositoryInterface
-     */
-    private $abandonedCartRepository;
-
-    public function __construct(
-        CartRepository $cartRepository,
-        EntityRepositoryInterface $abandonedCartRepository,
-        EntityRepositoryInterface $scheduledTaskRepository
-    ) {
-        $this->cartRepository = $cartRepository;
-        $this->abandonedCartRepository = $abandonedCartRepository;
+    public function __construct(AbandonedCartManager $manager, EntityRepositoryInterface $scheduledTaskRepository)
+    {
+        $this->manager = $manager;
 
         parent::__construct($scheduledTaskRepository);
     }
@@ -45,26 +31,6 @@ class DeleteAbandonedCartTaskHandler extends ScheduledTaskHandler
 
     public function run(): void
     {
-        foreach ($this->cartRepository->findTokensForUpdatedOrDeletedWithAbandonedCartAssociation() as $token) {
-            $abandonedCartId = $this->findAbandonedCartIdByToken($token);
-
-            if ($abandonedCartId !== null) {
-                $this->abandonedCartRepository->delete([
-                    [
-                        'id' => $abandonedCartId,
-                    ],
-                ], Context::createDefaultContext());
-            }
-        }
-    }
-
-    private function findAbandonedCartIdByToken(string $token): ?string
-    {
-        $criteria = new Criteria();
-        $criteria->addFilter(new EqualsFilter('cartToken', $token));
-
-        return $this->abandonedCartRepository
-            ->searchIds($criteria, Context::createDefaultContext())
-            ->firstId();
+        $this->manager->cleanUp();
     }
 }

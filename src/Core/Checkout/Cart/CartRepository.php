@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace MailCampaigns\AbandonedCart\Core\Checkout\Cart;
 
@@ -10,15 +10,8 @@ use Shopware\Core\System\SystemConfig\SystemConfigService;
  */
 class CartRepository
 {
-    /**
-     * @var Connection
-     */
-    private $connection;
-
-    /**
-     * @var SystemConfigService
-     */
-    private $systemConfigService;
+    private Connection $connection;
+    private SystemConfigService $systemConfigService;
 
     public function __construct(
         Connection $connection,
