@@ -17,7 +17,7 @@ class AbandonedCartEntity extends Entity
 
     protected string $cartToken;
     protected float $price;
-    protected string $lineItems;
+    protected array $lineItems;
     protected string $customerId;
     protected string $salesChannelId;
     protected ?CustomerEntity $customer;
@@ -45,12 +45,12 @@ class AbandonedCartEntity extends Entity
 
     public function getLineItems(): array
     {
-        return json_decode($this->lineItems, true);
+        return $this->lineItems;
     }
 
     public function setLineItems(array $lineItems): void
     {
-        $this->lineItems = json_encode($lineItems);
+        $this->lineItems = $lineItems;
     }
 
     public function getCustomerId(): string
