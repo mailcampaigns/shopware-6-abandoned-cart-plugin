@@ -26,40 +26,32 @@ class CartRepository
      */
     public function findMarkableAsAbandoned(): array
     {
-        $markAbandonedAfter = (new \DateTime())->modify(sprintf(
-            '-%d seconds',
-            $this->systemConfigService->get('MailCampaignsAbandonedCart.config.markAbandonedAfter')
-        ));
+        $selectAbandonedCartNamesQuery = $this->getAbandonedCartNamesQuery();
 
         $field = $this->payloadExists() ? 'payload' : 'cart';
         $statement = $this->connection->prepare(<<<SQL
             SELECT
-                `cart`.`token`,
-                `cart`.`name`,
-                `cart`.`$field` AS payload,
-                `cart`.`price`,
-                `cart`.`line_item_count`,
-                LOWER(HEX(`cart`.`currency_id`)) AS `currency_id`,
-                LOWER(HEX(`cart`.`shipping_method_id`)) AS `shipping_method_id`,
-                LOWER(HEX(`cart`.`payment_method_id`)) AS `payment_method_id`,
-                LOWER(HEX(`cart`.`country_id`)) AS `country_id`,
-                LOWER(HEX(`cart`.`customer_id`)) AS `customer_id`,
-                LOWER(HEX(`cart`.`sales_channel_id`)) AS `sales_channel_id`,
-                `cart`.`created_at`
-            FROM `cart`
+                cart.token,
+                cart.name,
+                cart.$field AS payload,
+                cart.price,
+                cart.line_item_count,
+                LOWER(HEX(cart.currency_id)) AS currency_id,
+                LOWER(HEX(cart.shipping_method_id)) AS shipping_method_id,
+                LOWER(HEX(cart.payment_method_id)) AS payment_method_id,
+                LOWER(HEX(cart.country_id)) AS country_id,
+                LOWER(HEX(cart.customer_id)) AS customer_id,
+                LOWER(HEX(cart.sales_channel_id)) AS sales_channel_id,
+                cart.created_at
+            FROM cart
 
-            JOIN `customer` ON `cart`.`customer_id` = `customer`.`id`
-                AND `cart`.`sales_channel_id` = `customer`.`sales_channel_id`
-                AND `customer`.`active` = 1
+            LEFT JOIN abandoned_cart ON cart.token = abandoned_cart.cart_token
+                AND cart.sales_channel_id = abandoned_cart.sales_channel_id
 
-            LEFT JOIN `abandoned_cart` ON `cart`.`token` = `abandoned_cart`.`cart_token`
-                AND `cart`.`sales_channel_id` = `abandoned_cart`.`sales_channel_id`
+            WHERE abandoned_cart.id IS NULL
+            AND cart.`name` IN ($selectAbandonedCartNamesQuery)
 
-            WHERE `abandoned_cart`.`id` IS NULL
-            AND `cart`.`customer_id` IS NOT NULL
-            AND `cart`.`created_at` < '{$markAbandonedAfter->format('Y-m-d H:i:s.v')}'
-
-            ORDER BY `cart`.`created_at`
+            ORDER BY cart.created_at
             LIMIT 100;
         SQL);
 
@@ -74,20 +66,17 @@ class CartRepository
      */
     public function findTokensForUpdatedOrDeletedWithAbandonedCartAssociation(): array
     {
-        $considerAbandonedAfter = (new \DateTime())->modify(sprintf(
-            '-%d seconds',
-            $this->systemConfigService->get('MailCampaignsAbandonedCart.config.markAbandonedAfter')
-        ));
+        $selectAbandonedCartNamesQuery = $this->getAbandonedCartNamesQuery();
 
         $statement = $this->connection->prepare(<<<SQL
             SELECT
-                `abandoned_cart`.`cart_token` AS `token`
-            FROM `abandoned_cart`
+                abandoned_cart.cart_token AS token
+            FROM abandoned_cart
 
-            LEFT JOIN `cart` ON `abandoned_cart`.`cart_token` = `cart`.`token`
-                AND `cart`.`created_at` < '{$considerAbandonedAfter->format('Y-m-d H:i:s.v')}'
+            LEFT JOIN cart ON abandoned_cart.cart_token = cart.token
+                AND cart.`name` IN ($selectAbandonedCartNamesQuery)
 
-            WHERE `cart`.`token` IS NULL;
+            WHERE cart.token IS NULL;
         SQL);
 
         return array_column(
@@ -109,5 +98,44 @@ class CartRepository
             $statement->executeQuery()->fetchAllAssociative(),
             'Field'
         ));
+    }
+
+    private function getAbandonedCartNamesQuery(): string
+    {
+        $considerAbandonedAfter = (new \DateTime())->modify(sprintf(
+            '-%d seconds',
+            $this->systemConfigService->get('MailCampaignsAbandonedCart.config.markAbandonedAfter')
+        ));
+
+        return <<<SQL
+            SELECT
+                /* A customer can have multiple cart records. Select the most recent. */
+                SUBSTRING_INDEX(
+                    GROUP_CONCAT(cart.`name` ORDER BY IFNULL(cart.updated_at, cart.created_at) DESC),
+                    ',',
+                    1
+                ) AS `name`
+            FROM cart
+
+            /* Exclude for inactive customers. */
+            JOIN customer ON cart.customer_id = customer.id
+                AND cart.sales_channel_id = customer.sales_channel_id
+                AND customer.active = 1
+
+            /* Exclude for customers with an order placed after their last cart record. */
+            LEFT JOIN order_customer ON customer.id = order_customer.customer_id
+                AND order_customer.created_at >= IFNULL(cart.updated_at, cart.created_at)
+
+            WHERE IFNULL(cart.updated_at, cart.created_at) < '{$considerAbandonedAfter->format('Y-m-d H:i:s.v')}'
+            AND cart.`name` != 'recalculation'
+            AND order_customer.order_id IS NULL
+
+            GROUP BY cart.customer_id
+
+            /* Prevent empty subselect. */
+            UNION
+
+            SELECT 'dummy-cart';
+        SQL;
     }
 }
