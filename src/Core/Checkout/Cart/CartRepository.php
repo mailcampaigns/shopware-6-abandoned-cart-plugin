@@ -135,7 +135,7 @@ class CartRepository
             /* Prevent empty subselect. */
             UNION
 
-            SELECT 'dummy-cart';
+            SELECT 'dummy-cart'
         SQL;
     }
 }
