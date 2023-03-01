@@ -50,6 +50,8 @@ class CartRepository
 
             WHERE abandoned_cart.id IS NULL
             AND cart.`name` IN ($selectAbandonedCartNamesQuery)
+            AND cart.`customer_id` != null
+            AND cart.`customer_id` != ''
 
             ORDER BY cart.created_at
             LIMIT 100;
