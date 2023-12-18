@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace MailCampaigns\AbandonedCart\Service\ScheduledTask;
 
@@ -14,9 +16,6 @@ class DeleteAbandonedCartTask extends ScheduledTask
         return 'mailcampaigns.delete_abandoned_cart';
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public static function getDefaultInterval(): int
     {
         return 60;

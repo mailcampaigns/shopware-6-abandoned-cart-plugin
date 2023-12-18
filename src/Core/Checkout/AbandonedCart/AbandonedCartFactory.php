@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart;
 

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart;
 
@@ -19,7 +21,7 @@ use Shopware\Core\System\SalesChannel\SalesChannelDefinition;
 /**
  * @author Twan Haverkamp <twan@mailcampaigns.nl>
  */
-class AbandonedCartDefinition extends EntityDefinition
+final class AbandonedCartDefinition extends EntityDefinition
 {
     public const ENTITY_NAME = 'abandoned_cart';
 
@@ -38,7 +40,7 @@ class AbandonedCartDefinition extends EntityDefinition
         return AbandonedCartCollection::class;
     }
 
-    protected function defineFields(): FieldCollection
+    public function defineFields(): FieldCollection
     {
         return new FieldCollection([
             (new IdField('id', 'id'))->addFlags(new ApiAware(), new PrimaryKey(), new Required()),

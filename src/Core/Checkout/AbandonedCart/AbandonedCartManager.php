@@ -1,31 +1,31 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart;
 
+use Doctrine\DBAL\Exception;
 use MailCampaigns\AbandonedCart\Core\Checkout\Cart\CartRepository;
+use Shopware\Core\Framework\Api\Context\SystemSource;
 use Shopware\Core\Framework\Context;
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 
 /**
  * @author Twan Haverkamp <twan@mailcampaigns.nl>
  */
-class AbandonedCartManager
+final class AbandonedCartManager
 {
-    private CartRepository $cartRepository;
-    private EntityRepositoryInterface $abandonedCartRepository;
-
     public function __construct(
-        CartRepository $cartRepository,
-        EntityRepositoryInterface $abandonedCartRepository
+        private readonly CartRepository $cartRepository,
+        private readonly EntityRepository $abandonedCartRepository
     ) {
-        $this->cartRepository = $cartRepository;
-        $this->abandonedCartRepository = $abandonedCartRepository;
     }
 
     /**
      * @return int The number of generated "abandoned" carts.
+     * @throws Exception
      */
     public function generate(): int
     {
@@ -42,7 +42,7 @@ class AbandonedCartManager
                     'customerId' => $abandonedCart->getCustomerId(),
                     'salesChannelId' => $abandonedCart->getSalesChannelId(),
                 ],
-            ], Context::createDefaultContext());
+            ], new Context(new SystemSource()));
 
             $cnt++;
         }
@@ -52,6 +52,7 @@ class AbandonedCartManager
 
     /**
      * @return int The number of deleted "abandoned" carts.
+     * @throws Exception
      */
     public function cleanUp(): int
     {
@@ -65,7 +66,7 @@ class AbandonedCartManager
                     [
                         'id' => $abandonedCartId,
                     ],
-                ], Context::createDefaultContext());
+                ], new Context(new SystemSource()));
 
                 $cnt++;
             }
@@ -80,7 +81,7 @@ class AbandonedCartManager
         $criteria->addFilter(new EqualsFilter('cartToken', $token));
 
         return $this->abandonedCartRepository
-            ->searchIds($criteria, Context::createDefaultContext())
+            ->searchIds($criteria, new Context(new SystemSource()))
             ->firstId();
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MailCampaigns\AbandonedCart\Exception;
 
 use InvalidArgumentException;
@@ -17,6 +19,8 @@ class InvalidCartDataException extends InvalidArgumentException
             $actualValueType = get_class($actualValue);
         }
 
-        parent::__construct("Unexpected value for '$key': expecting '$expectedValue', got '$actualValueType'.");
+        parent::__construct(
+            "Unexpected value for '$key': expecting '$expectedValue', got '$actualValueType'."
+        );
     }
 }

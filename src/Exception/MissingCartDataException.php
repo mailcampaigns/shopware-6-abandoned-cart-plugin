@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MailCampaigns\AbandonedCart\Exception;
 
 use LogicException;
