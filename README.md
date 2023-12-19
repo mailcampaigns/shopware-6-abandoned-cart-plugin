@@ -10,7 +10,13 @@ This plugin is currently only available as a [Composer](https://getcomposer.org/
 and can be installed with the following command:
 
 ```bash
-$ composer require "mailcampaigns/shopware-6-abandoned-cart-plugin"
+composer require mailcampaigns/shopware-6-abandoned-cart-plugin
+```
+
+After that, run this command so Shopware knows about its existence:
+
+```bash
+bin/console plugin:refresh
 ```
 
 ### Activate plugin
@@ -18,7 +24,7 @@ After installation, this plugin still needs to be activated. This can be done vi
 (**Extensions > My extensions**) or by running the following command:
 
 ```bash
-$ bin/console plugin:install --activate MailCampaignsAbandonedCart
+bin/console plugin:install --activate MailCampaignsAbandonedCart
 ```
 
 ### Configuration

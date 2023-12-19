@@ -11,22 +11,17 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 /**
  * @author Twan Haverkamp <twan@mailcampaigns.nl>
  */
-#[AsMessageHandler(handles: MarkAbandonedCartTask::class)]
+#[AsMessageHandler]
 final class MarkAbandonedCartTaskHandler
 {
     public function __construct(private readonly AbandonedCartManager $manager)
     {
     }
 
-    public static function getHandledMessages(): iterable
-    {
-        yield MarkAbandonedCartTask::class;
-    }
-
     /**
      * @throws Exception
      */
-    public function run(): void
+    public function __invoke(MarkAbandonedCartTask $message): void
     {
         $this->manager->generate();
     }
