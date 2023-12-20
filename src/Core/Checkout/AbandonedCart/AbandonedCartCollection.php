@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart;
 
@@ -15,9 +17,9 @@ use Shopware\Core\Framework\DataAbstractionLayer\EntityCollection;
  * @method AbandonedCartEntity|null first()
  * @method AbandonedCartEntity|null last()
  */
-class AbandonedCartCollection extends EntityCollection
+final class AbandonedCartCollection extends EntityCollection
 {
-    protected function getExpectedClass(): string
+    public function getExpectedClass(): string
     {
         return AbandonedCartEntity::class;
     }

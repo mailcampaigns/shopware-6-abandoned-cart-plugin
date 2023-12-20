@@ -1,8 +1,13 @@
-<?php declare(strict_types=1);
+<?php
+
+/** @noinspection PhpUnused */
+
+declare(strict_types=1);
 
 namespace MailCampaigns\AbandonedCart\Migration;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
 use MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartEntity;
 use Shopware\Core\Framework\Migration\MigrationStep;
 
@@ -11,18 +16,15 @@ use Shopware\Core\Framework\Migration\MigrationStep;
  *
  * @author Twan Haverkamp <twan@mailcampaigns.nl>
  */
-class Migration1630393920AbandonedCart extends MigrationStep
+final class Migration1630393920AbandonedCart extends MigrationStep
 {
-    /**
-     * {@inheritdoc}
-     */
     public function getCreationTimestamp(): int
     {
         return 1630393920;
     }
 
     /**
-     * {@inheritdoc}
+     * @throws Exception
      */
     public function update(Connection $connection): void
     {
@@ -48,7 +50,7 @@ class Migration1630393920AbandonedCart extends MigrationStep
     }
 
     /**
-     * {@inheritdoc}
+     * @throws Exception
      */
     public function updateDestructive(Connection $connection): void
     {

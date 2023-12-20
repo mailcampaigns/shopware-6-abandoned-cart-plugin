@@ -1,14 +1,18 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace MailCampaigns\AbandonedCart\Core\Checkout\Cart;
 
+use DateTime;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 
 /**
  * @author Twan Haverkamp <twan@mailcampaigns.nl>
  */
-class CartRepository
+final class CartRepository
 {
     private Connection $connection;
     private SystemConfigService $systemConfigService;
@@ -23,6 +27,7 @@ class CartRepository
 
     /**
      * Returns an array of `cart` records which can be considered as "abandoned".
+     * @throws Exception
      */
     public function findMarkableAsAbandoned(): array
     {
@@ -65,6 +70,7 @@ class CartRepository
     /**
      * Returns an array of `cart` tokens which no longer exists or considered as "abandoned"
      * but still has an `abandoned_cart` association.
+     * @throws Exception
      */
     public function findTokensForUpdatedOrDeletedWithAbandonedCartAssociation(): array
     {
@@ -89,6 +95,7 @@ class CartRepository
 
     /**
      * Can be used for backwards compatibility fixes for < Shopware 6.4.12.
+     * @throws Exception
      */
     private function payloadExists(): bool
     {
@@ -104,7 +111,7 @@ class CartRepository
 
     private function getAbandonedCartNamesQuery(): string
     {
-        $considerAbandonedAfter = (new \DateTime())->modify(sprintf(
+        $considerAbandonedAfter = (new DateTime())->modify(sprintf(
             '-%d seconds',
             $this->systemConfigService->get('MailCampaignsAbandonedCart.config.markAbandonedAfter')
         ));

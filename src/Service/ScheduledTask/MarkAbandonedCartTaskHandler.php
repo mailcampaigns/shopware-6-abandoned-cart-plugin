@@ -1,35 +1,27 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace MailCampaigns\AbandonedCart\Service\ScheduledTask;
 
+use Doctrine\DBAL\Exception;
 use MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager;
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
-use Shopware\Core\Framework\MessageQueue\ScheduledTask\ScheduledTaskHandler;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
  * @author Twan Haverkamp <twan@mailcampaigns.nl>
  */
-class MarkAbandonedCartTaskHandler extends ScheduledTaskHandler
+#[AsMessageHandler]
+final class MarkAbandonedCartTaskHandler
 {
-    private AbandonedCartManager $manager;
-    private EntityRepositoryInterface $abandonedCartRepository;
-
-    public function __construct(AbandonedCartManager $manager, EntityRepositoryInterface $scheduledTaskRepository)
+    public function __construct(private readonly AbandonedCartManager $manager)
     {
-        $this->manager = $manager;
-
-        parent::__construct($scheduledTaskRepository);
     }
 
     /**
-     * {@inheritdoc}
+     * @throws Exception
      */
-    public static function getHandledMessages(): iterable
-    {
-        yield MarkAbandonedCartTask::class;
-    }
-
-    public function run(): void
+    public function __invoke(MarkAbandonedCartTask $message): void
     {
         $this->manager->generate();
     }
