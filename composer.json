@@ -9,9 +9,9 @@
         }
     ],
     "require": {
-        "php": "~8.1.0 || ~8.2.0",
+        "php": "~8.2.0 || ~8.3.0",
         "ext-json": "*",
-        "shopware/core": "6.5.*"
+        "shopware/core": "6.6.*"
     },
     "extra": {
         "shopware-plugin-class": "MailCampaigns\\AbandonedCart\\MailCampaignsAbandonedCart",
