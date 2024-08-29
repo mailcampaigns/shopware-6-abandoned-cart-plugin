@@ -37,7 +37,6 @@ final class CartRepository
         $statement = $this->connection->prepare(<<<SQL
             SELECT
                 cart.token,
-                cart.name,
                 cart.$field AS payload,
                 cart.price,
                 cart.line_item_count,
@@ -136,7 +135,6 @@ final class CartRepository
                 AND order_customer.created_at >= IFNULL(cart.updated_at, cart.created_at)
 
             WHERE IFNULL(cart.updated_at, cart.created_at) < '{$considerAbandonedAfter->format('Y-m-d H:i:s.v')}'
-            AND (cart.`name` != 'recalculation' OR cart.`name` IS NULL)
             AND order_customer.order_id IS NULL
 
             GROUP BY cart.customer_id
