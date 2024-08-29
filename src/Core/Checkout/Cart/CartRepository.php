@@ -31,7 +31,7 @@ final class CartRepository
      */
     public function findMarkableAsAbandoned(): array
     {
-        $selectAbandonedCartNamesQuery = $this->getAbandonedCartNamesQuery();
+        $selectAbandonedCartTokensQuery = $this->getAbandonedCartTokensQuery();
 
         $field = $this->payloadExists() ? 'payload' : 'cart';
         $statement = $this->connection->prepare(<<<SQL
@@ -54,7 +54,7 @@ final class CartRepository
                 AND cart.sales_channel_id = abandoned_cart.sales_channel_id
 
             WHERE abandoned_cart.id IS NULL
-            AND cart.`name` IN ($selectAbandonedCartNamesQuery)
+            AND cart.`token` IN ($selectAbandonedCartTokensQuery)
             AND cart.`customer_id` IS NOT NULL
             AND cart.`customer_id` != ''
 
@@ -74,7 +74,7 @@ final class CartRepository
      */
     public function findTokensForUpdatedOrDeletedWithAbandonedCartAssociation(): array
     {
-        $selectAbandonedCartNamesQuery = $this->getAbandonedCartNamesQuery();
+        $selectAbandonedCartTokensQuery = $this->getAbandonedCartTokensQuery();
 
         $statement = $this->connection->prepare(<<<SQL
             SELECT
@@ -82,7 +82,7 @@ final class CartRepository
             FROM abandoned_cart
 
             LEFT JOIN cart ON abandoned_cart.cart_token = cart.token
-                AND cart.`name` IN ($selectAbandonedCartNamesQuery)
+                AND cart.`token` IN ($selectAbandonedCartTokensQuery)
 
             WHERE cart.token IS NULL;
         SQL);
@@ -109,7 +109,7 @@ final class CartRepository
         ));
     }
 
-    private function getAbandonedCartNamesQuery(): string
+    private function getAbandonedCartTokensQuery(): string
     {
         $considerAbandonedAfter = (new DateTime())->modify(sprintf(
             '-%d seconds',
@@ -120,10 +120,10 @@ final class CartRepository
             SELECT
                 /* A customer can have multiple cart records. Select the most recent. */
                 SUBSTRING_INDEX(
-                    GROUP_CONCAT(cart.`name` ORDER BY IFNULL(cart.updated_at, cart.created_at) DESC),
+                    GROUP_CONCAT(cart.`token` ORDER BY IFNULL(cart.updated_at, cart.created_at) DESC),
                     ',',
                     1
-                ) AS `name`
+                ) AS `token`
             FROM cart
 
             /* Exclude for inactive customers. */
@@ -136,7 +136,7 @@ final class CartRepository
                 AND order_customer.created_at >= IFNULL(cart.updated_at, cart.created_at)
 
             WHERE IFNULL(cart.updated_at, cart.created_at) < '{$considerAbandonedAfter->format('Y-m-d H:i:s.v')}'
-            AND cart.`name` != 'recalculation'
+            AND (cart.`name` != 'recalculation' OR cart.`name` IS NULL)
             AND order_customer.order_id IS NULL
 
             GROUP BY cart.customer_id
