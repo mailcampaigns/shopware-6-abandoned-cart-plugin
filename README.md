@@ -1,4 +1,4 @@
-# MailCampaigns - "Abandoned" cart plugin
+# MailCampaigns - "Abandoned" cart plugin for Shopware 6.6
 This [Shopware 6](https://www.shopware.com/en/products/shopware-6/) plugin allows you to automatically mark carts as
 "abandoned" after a configured number of seconds. Currently, the "abandoned" carts are only available through the
 custom */abandoned-cart* API endpoints.
