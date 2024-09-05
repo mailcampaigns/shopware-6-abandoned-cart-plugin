@@ -21,7 +21,6 @@ class AbandonedCartFactory
         'price',
         'payload',
         'customer_id',
-        'sales_channel_id',
     ];
 
     /**
@@ -43,7 +42,6 @@ class AbandonedCartFactory
         $entity->setPrice((float)$data['price']);
         $entity->setLineItems($cart->getLineItems()->jsonSerialize());
         $entity->setCustomerId($data['customer_id']);
-        $entity->setSalesChannelId($data['sales_channel_id']);
 
         return $entity;
     }
