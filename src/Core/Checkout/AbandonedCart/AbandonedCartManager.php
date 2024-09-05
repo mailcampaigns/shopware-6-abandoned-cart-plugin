@@ -40,7 +40,6 @@ final class AbandonedCartManager
                     'price' => $abandonedCart->getPrice(),
                     'lineItems' => $abandonedCart->getLineItems(),
                     'customerId' => $abandonedCart->getCustomerId(),
-                    'salesChannelId' => $abandonedCart->getSalesChannelId(),
                 ],
             ], new Context(new SystemSource()));
 

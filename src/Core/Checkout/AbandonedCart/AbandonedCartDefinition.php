@@ -16,7 +16,6 @@ use Shopware\Core\Framework\DataAbstractionLayer\Field\JsonField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\ManyToOneAssociationField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\StringField;
 use Shopware\Core\Framework\DataAbstractionLayer\FieldCollection;
-use Shopware\Core\System\SalesChannel\SalesChannelDefinition;
 
 /**
  * @author Twan Haverkamp <twan@mailcampaigns.nl>
