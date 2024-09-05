@@ -33,36 +33,48 @@ final class CartRepository
     {
         $selectAbandonedCartTokensQuery = $this->getAbandonedCartTokensQuery();
 
-        $statement = $this->connection->prepare(<<<SQL
-            SELECT
-                cart.token,
-                cart.payload,
-                cart.price,
-                cart.line_item_count,
-                LOWER(HEX(cart.currency_id)) AS currency_id,
-                LOWER(HEX(cart.shipping_method_id)) AS shipping_method_id,
-                LOWER(HEX(cart.payment_method_id)) AS payment_method_id,
-                LOWER(HEX(cart.country_id)) AS country_id,
-                LOWER(HEX(cart.customer_id)) AS customer_id,
-                LOWER(HEX(cart.sales_channel_id)) AS sales_channel_id,
-                cart.created_at
-            FROM cart
+        $qb = $this->connection->createQueryBuilder();
 
-            LEFT JOIN abandoned_cart ON cart.token = abandoned_cart.cart_token
-                AND cart.sales_channel_id = abandoned_cart.sales_channel_id
+        $qb->select('c.token, c.payload, c.created_at')
+            ->from('cart', 'c')
+            ->leftJoin('c', 'abandoned_cart', 'ac', 'c.token = ac.cart_token')
+            ->where($qb->expr()->isNull('ac.id'))
+            ->andWhere($qb->expr()->in('c.token', $selectAbandonedCartTokensQuery))
+            ->orderBy('c.created_at', 'ASC')
+            ->setMaxResults(100);
 
-            WHERE abandoned_cart.id IS NULL
-            AND cart.`token` IN ($selectAbandonedCartTokensQuery)
-            AND cart.`customer_id` IS NOT NULL
-            AND cart.`customer_id` != ''
+        $data = $qb->executeQuery()->fetchAllAssociative();
 
-            ORDER BY cart.created_at
-            LIMIT 100;
-        SQL);
+        // Return only carts with a customer ID.
+        $data = array_filter($data, function ($cart) {
+            $cart = unserialize($cart['payload']);
 
-        return $statement
-            ->executeQuery()
-            ->fetchAllAssociative();
+            $firstAddress = $cart->getDeliveries()->getAddresses()->first();
+            if($firstAddress) {
+                $customerId = $firstAddress->getCustomerId();
+                if($customerId) {
+                    // Add the customer ID to the result
+                    $cart->customer_id = $customerId;
+                    return true;
+                }
+            }
+            return false;
+        });
+
+        // Add price to result
+        $data = array_map(function ($cart) {
+            $cart = unserialize($cart['payload']);
+            $cart->price = (float)$cart->getPrice()->getTotalPrice();
+            return $cart;
+        }, $data);
+
+        // Add line item count to result
+        $data = array_map(function ($cart) {
+            $cart->line_item_count = count($cart->getLineItems());
+            return $cart;
+        }, $data);
+
+        return $data;
     }
 
     /**
