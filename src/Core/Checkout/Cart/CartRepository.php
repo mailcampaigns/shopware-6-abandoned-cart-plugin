@@ -144,25 +144,12 @@ final class CartRepository
             SELECT
                 /* A customer can have multiple cart records. Select the most recent. */
                 SUBSTRING_INDEX(
-                    GROUP_CONCAT(cart.`token` ORDER BY IFNULL(cart.updated_at, cart.created_at) DESC),
+                    GROUP_CONCAT(cart.`token` ORDER BY cart.created_at DESC),
                     ',',
                     1
                 ) AS `token`
             FROM cart
-
-            /* Exclude for inactive customers. */
-            JOIN customer ON cart.customer_id = customer.id
-                AND cart.sales_channel_id = customer.sales_channel_id
-                AND customer.active = 1
-
-            /* Exclude for customers with an order placed after their last cart record. */
-            LEFT JOIN order_customer ON customer.id = order_customer.customer_id
-                AND order_customer.created_at >= IFNULL(cart.updated_at, cart.created_at)
-
-            WHERE IFNULL(cart.updated_at, cart.created_at) < '{$considerAbandonedAfter->format('Y-m-d H:i:s.v')}'
-            AND order_customer.order_id IS NULL
-
-            GROUP BY cart.customer_id
+            WHERE cart.created_at < '{$considerAbandonedAfter->format('Y-m-d H:i:s.v')}'
 
             /* Prevent empty subselect. */
             UNION
