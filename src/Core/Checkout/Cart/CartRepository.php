@@ -53,26 +53,56 @@ final class CartRepository
             if($firstAddress) {
                 $customerId = $firstAddress->getCustomerId();
                 if($customerId) {
-                    // Add the customer ID to the result
-                    $cart->customer_id = $customerId;
                     return true;
                 }
             }
             return false;
         });
 
-        // Add price to result
-        $data = array_map(function ($cart) {
+        // Loop over results
+        foreach($data as $key => $cart) {
             $cart = unserialize($cart['payload']);
-            $cart->price = (float)$cart->getPrice()->getTotalPrice();
-            return $cart;
-        }, $data);
 
-        // Add line item count to result
-        $data = array_map(function ($cart) {
-            $cart->line_item_count = count($cart->getLineItems());
-            return $cart;
-        }, $data);
+            // Remove carts that are marked as recalculated
+            if($cart->getBehavior()->isRecalculation()) {
+                unset($data[$key]);
+                continue;
+            }
+
+            // Add customer ID to result
+            $data[$key]['customer_id'] = $cart->getDeliveries()->getAddresses()->first()->getCustomerId();
+
+            // Add price to each result
+            $data[$key]['price'] = $cart->getPrice()->getTotalPrice();
+
+            // Add line item count to result
+            $data[$key]['line_item_count'] = count($cart->getLineItems());
+
+            // Remove customers that are inactive
+            $qb = $this->connection->createQueryBuilder();
+            $qb->select('c.id')
+                ->from('customer', 'c')
+                ->where($qb->expr()->eq('c.id', ':customerId'))
+                ->andWhere($qb->expr()->eq('c.active', ':active'))
+                ->setParameter('customerId', hex2bin($data[$key]['customer_id']))
+                ->setParameter('active', 1);
+            $result = $qb->executeQuery()->fetchOne();
+
+            if($result === false) {
+                unset($data[$key]);
+                continue;
+            }
+
+            // Remove customers that have placed an order after the cart was created
+            $qb = $this->connection->createQueryBuilder();
+            $qb->select('oc.id')
+                ->from('order_customer', 'oc')
+                ->leftJoin('oc', 'customer', 'c', 'oc.customer_id = c.id')
+                ->where($qb->expr()->eq('oc.customer_id', ':customerId'))
+                ->andWhere($qb->expr()->gte('oc.created_at', ':cartCreatedAt'))
+                ->setParameter('customerId', $data[$key]['customer_id'])
+                ->setParameter('cartCreatedAt', $data[$key]['created_at']);
+        }
 
         return $data;
     }
