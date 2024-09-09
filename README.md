@@ -3,6 +3,8 @@ This [Shopware 6](https://www.shopware.com/en/products/shopware-6/) plugin adds 
 After a configured number of seconds a cart can be considered as abandoned.
 It only returns carts of active known customers, that have not been converted to an order yet. This way you can send a reminder to your customers to complete their order. 
 
+Check the releases for support for previous versions of Shopify. 
+
 ## Getting started
 
 Either download the .zip file and upload it in your Shopware 6 Admin panel via *Extensions > My extensions > Upload extension* or install it via Composer.
