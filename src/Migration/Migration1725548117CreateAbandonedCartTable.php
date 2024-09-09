@@ -15,7 +15,7 @@ use Shopware\Core\Framework\Migration\MigrationStep;
  *
  * @author Max Seelig <max.seelig@heroesonly.com>
  */
-final class Migration1725548117AbandonedCart extends MigrationStep
+final class Migration1725548117CreateAbandonedCartTable extends MigrationStep
 {
     public function getCreationTimestamp(): int
     {
