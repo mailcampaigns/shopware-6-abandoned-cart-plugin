@@ -108,8 +108,8 @@ final class CartRepository
     }
 
     /**
-     * Returns an array of `cart` tokens which no longer exists or considered as "abandoned"
-     * but still has an `abandoned_cart` association.
+     * Returns an array of cart tokens that are considered "abandoned" and no longer exist in the cart table,
+     * but still have an association in the abandoned_cart table.
      * @throws Exception
      */
     public function findOrphanedAbandonedCartTokens(): array
