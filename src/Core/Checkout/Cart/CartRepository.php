@@ -112,7 +112,7 @@ final class CartRepository
      * but still has an `abandoned_cart` association.
      * @throws Exception
      */
-    public function findTokensForUpdatedOrDeletedWithAbandonedCartAssociation(): array
+    public function findOrphanedAbandonedCartTokens(): array
     {
         $selectAbandonedCartTokensQuery = $this->getAbandonedCartTokensQuery();
 

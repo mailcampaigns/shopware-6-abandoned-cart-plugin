@@ -57,7 +57,7 @@ final class AbandonedCartManager
     {
         $cnt = 0;
 
-        foreach ($this->cartRepository->findTokensForUpdatedOrDeletedWithAbandonedCartAssociation() as $token) {
+        foreach ($this->cartRepository->findOrphanedAbandonedCartTokens() as $token) {
             $abandonedCartId = $this->findAbandonedCartIdByToken($token);
 
             if ($abandonedCartId !== null) {
