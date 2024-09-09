@@ -8,19 +8,18 @@ namespace MailCampaigns\AbandonedCart\Migration;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
-use MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartEntity;
 use Shopware\Core\Framework\Migration\MigrationStep;
 
 /**
  * Creates a table for {@see AbandonedCartEntity}.
  *
- * @author Twan Haverkamp <twan@mailcampaigns.nl>
+ * @author Max Seelig <max.seelig@heroesonly.com>
  */
-final class Migration1630393920AbandonedCart extends MigrationStep
+final class Migration1725548117AbandonedCart extends MigrationStep
 {
     public function getCreationTimestamp(): int
     {
-        return 1630393920;
+        return 1725548117;
     }
 
     /**
@@ -35,13 +34,11 @@ final class Migration1630393920AbandonedCart extends MigrationStep
                 `price` FLOAT NOT NULL,
                 `line_items` JSON,
                 `customer_id` BINARY(16) NOT NULL,
-                `sales_channel_id` BINARY(16) NOT NULL,
                 `created_at` DATETIME(3) NOT NULL,
                 `updated_at` DATETIME(3),
                 PRIMARY KEY (`id`),
                 UNIQUE KEY (`cart_token`),
-                INDEX (`customer_id`),
-                INDEX (`sales_channel_id`)
+                INDEX (`customer_id`)
             )
             ENGINE = InnoDB
             DEFAULT CHARSET = utf8mb4
