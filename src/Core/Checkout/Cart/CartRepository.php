@@ -36,22 +36,35 @@ final class CartRepository
      * 5. Removes carts associated with inactive customers.
      * 6. Removes carts for customers who have placed an order after the cart was created.
      * 
+     * @param bool $retrieveUpdated Optional parameter to specify whether to retrieve updated abandoned carts.
+     *                              If true, retrieves updated abandoned carts. If false, retrieves new abandoned carts.
+     *                              Default is false.
      * @return array An array of abandoned cart records with additional details.
      * @throws Exception
      */
-    public function findAbandonedCartsWithCriteria(): array
+    public function findAbandonedCartsWithCriteria(bool $retrieveUpdated = false): array
     {
         $selectAbandonedCartTokensQuery = $this->generateAbandonedCartTokensQuery();
 
         $qb = $this->connection->createQueryBuilder();
 
-        $qb->select('c.token, c.payload, c.created_at')
+        $qb->select('c.token, c.payload, c.created_at', 'ac.updated_at')
             ->from('cart', 'c')
             ->leftJoin('c', 'abandoned_cart', 'ac', 'c.token = ac.cart_token')
-            ->where($qb->expr()->isNull('ac.id'))
-            ->andWhere($qb->expr()->in('c.token', $selectAbandonedCartTokensQuery))
+            ->where($qb->expr()->in('c.token', $selectAbandonedCartTokensQuery))
             ->orderBy('c.created_at', 'ASC')
             ->setMaxResults(100);
+
+        if (!$retrieveUpdated) {
+            $qb->andWhere($qb->expr()->isNull('ac.id')); // Not yet marked as abandoned
+        } else{
+            // Updated after marked as abandoned
+            $qb->andWhere($qb->expr()->gt('c.created_at', 'ac.created_at'));
+            // and updated is null
+            $qb->andWhere($qb->expr()->isNull('ac.updated_at'));
+            // OR updated after updated
+            $qb->orWhere($qb->expr()->gt('c.created_at', 'ac.updated_at'));
+        }
 
         $data = $qb->executeQuery()->fetchAllAssociative();
 
