@@ -31,7 +31,7 @@ final class AbandonedCartManager
     {
         $cnt = 0;
 
-        foreach ($this->cartRepository->findMarkableAsAbandoned() as $cart) {
+        foreach ($this->cartRepository->findAbandonedCartsWithCriteria() as $cart) {
             $abandonedCart = AbandonedCartFactory::createFromArray($cart);
 
             $this->abandonedCartRepository->upsert([

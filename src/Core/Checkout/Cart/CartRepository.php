@@ -26,10 +26,20 @@ final class CartRepository
     }
 
     /**
-     * Returns an array of `cart` records which can be considered as "abandoned".
+     * Finds and returns an array of `cart` records that are considered "abandoned" and meet specific criteria.
+     * 
+     * This method performs the following steps:
+     * 1. Retrieves cart records that are not marked as abandoned.
+     * 2. Filters carts to include only those with a customer ID.
+     * 3. Excludes carts marked for recalculation.
+     * 4. Adds customer ID, total price, and line item count to each cart.
+     * 5. Removes carts associated with inactive customers.
+     * 6. Removes carts for customers who have placed an order after the cart was created.
+     * 
+     * @return array An array of abandoned cart records with additional details.
      * @throws Exception
      */
-    public function findMarkableAsAbandoned(): array
+    public function findAbandonedCartsWithCriteria(): array
     {
         $selectAbandonedCartTokensQuery = $this->generateAbandonedCartTokensQuery();
 
