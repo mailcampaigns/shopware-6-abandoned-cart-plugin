@@ -34,7 +34,7 @@ bin/console cache:clear
 
 ### Configuration
 To determine when a cart can be considered "abandoned" you can configure this after activating the plugin.
-The value you enter is the number of seconds (default 3600, which is one hour) after a cart is created or updated.
+The value you enter is the number of seconds (default 3600, which is one hour) after a cart is created.
 
 Make sure the settings for the carts make sense in combination with the setting in our plugin. In other words, the setting
 for carts 'Time in minutes for a customer to finalize a transaction' should be longer than the setting in our plugin.
