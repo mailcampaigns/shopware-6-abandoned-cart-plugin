@@ -31,7 +31,7 @@ final class CartRepository
      */
     public function findMarkableAsAbandoned(): array
     {
-        $selectAbandonedCartTokensQuery = $this->getAbandonedCartTokensQuery();
+        $selectAbandonedCartTokensQuery = $this->generateAbandonedCartTokensQuery();
 
         $qb = $this->connection->createQueryBuilder();
 
@@ -114,7 +114,7 @@ final class CartRepository
      */
     public function findOrphanedAbandonedCartTokens(): array
     {
-        $selectAbandonedCartTokensQuery = $this->getAbandonedCartTokensQuery();
+        $selectAbandonedCartTokensQuery = $this->generateAbandonedCartTokensQuery();
 
         $statement = $this->connection->prepare(<<<SQL
             SELECT
@@ -133,7 +133,17 @@ final class CartRepository
         );
     }
 
-    private function getAbandonedCartTokensQuery(): string
+    /**
+     * Generates an SQL query to retrieve tokens of carts that are considered abandoned.
+     *
+     * This function constructs an SQL query that selects the most recent cart token
+     * for each customer whose cart has been abandoned. A cart is considered abandoned
+     * if it was created before a certain time threshold, which is determined by the
+     * 'MailCampaignsAbandonedCart.config.markAbandonedAfter' configuration setting.
+     *
+     * @return string The SQL query string to retrieve abandoned cart tokens.
+     */
+    private function generateAbandonedCartTokensQuery(): string
     {
         $considerAbandonedAfter = (new DateTime())->modify(sprintf(
             '-%d seconds',
