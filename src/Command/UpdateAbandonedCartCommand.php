@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace MailCampaigns\AbandonedCart\Command;
@@ -12,13 +11,13 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * @author Twan Haverkamp <twan@mailcampaigns.nl>
+ * @author Max Seelig <max.seelig@heroesonly.com>
  */
 #[AsCommand(
-    name: 'mailcampaigns:abandoned-cart:delete',
-    description: 'Deletes "abandoned" carts without an existing reference.'
+    name: 'mailcampaigns:abandoned-cart:update',
+    description: 'Updates "abandoned" carts that have been modified since they were marked as abandoned.'
 )]
-final class DeleteAbandonedCartCommand extends Command
+final class UpdateAbandonedCartCommand extends Command
 {
     public function __construct(private AbandonedCartManager $manager, string $name = null)
     {
@@ -30,10 +29,8 @@ final class DeleteAbandonedCartCommand extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output): int
     {
-        $cnt = $this->manager->cleanUp();
-
-        $output->writeln("Deleted $cnt \"abandoned\" shopping carts.");
-
+        $cnt = $this->manager->updateAbandonedCarts();
+        $output->writeln("Updated $cnt \"abandoned\" shopping carts.");
         return Command::SUCCESS;
     }
 }

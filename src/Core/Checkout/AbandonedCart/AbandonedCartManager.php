@@ -19,7 +19,7 @@ final class AbandonedCartManager
 {
     public function __construct(
         private readonly CartRepository $cartRepository,
-        private readonly EntityRepository $abandonedCartRepository
+        private readonly EntityRepository $abandonedCartRepository,
     ) {
     }
 
@@ -31,7 +31,7 @@ final class AbandonedCartManager
     {
         $cnt = 0;
 
-        foreach ($this->cartRepository->findMarkableAsAbandoned() as $cart) {
+        foreach ($this->cartRepository->findAbandonedCartsWithCriteria(false) as $cart) {
             $abandonedCart = AbandonedCartFactory::createFromArray($cart);
 
             $this->abandonedCartRepository->upsert([
@@ -40,7 +40,35 @@ final class AbandonedCartManager
                     'price' => $abandonedCart->getPrice(),
                     'lineItems' => $abandonedCart->getLineItems(),
                     'customerId' => $abandonedCart->getCustomerId(),
-                    'salesChannelId' => $abandonedCart->getSalesChannelId(),
+                ],
+            ], new Context(new SystemSource()));
+
+            $cnt++;
+        }
+
+        return $cnt;
+    }
+
+    /**
+     * Updates abandoned carts that have been modified since they were marked as abandoned.
+     *
+     * @throws Exception
+     */
+    public function updateAbandonedCarts(): int
+    {
+        $cnt = 0;
+
+        foreach ($this->cartRepository->findAbandonedCartsWithCriteria(true) as $cart) {
+            $abandonedCart = AbandonedCartFactory::createFromArray($cart);
+
+            // Get the abandoned cart ID by token.
+            $abandonedCartId = $this->findAbandonedCartIdByToken($abandonedCart->getCartToken());
+
+            $this->abandonedCartRepository->upsert([
+                [
+                    'id' => $abandonedCartId,
+                    'price' => $abandonedCart->getPrice(),
+                    'lineItems' => $abandonedCart->getLineItems(),
                 ],
             ], new Context(new SystemSource()));
 
@@ -58,7 +86,7 @@ final class AbandonedCartManager
     {
         $cnt = 0;
 
-        foreach ($this->cartRepository->findTokensForUpdatedOrDeletedWithAbandonedCartAssociation() as $token) {
+        foreach ($this->cartRepository->findOrphanedAbandonedCartTokens() as $token) {
             $abandonedCartId = $this->findAbandonedCartIdByToken($token);
 
             if ($abandonedCartId !== null) {

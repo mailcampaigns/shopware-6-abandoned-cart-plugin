@@ -13,11 +13,11 @@ class MarkAbandonedCartTask extends ScheduledTask
 {
     public static function getTaskName(): string
     {
-        return 'mailcampaigns.mark_abandoned_cart';
+        return 'mailcampaigns.abandoned_cart.mark';
     }
 
     public static function getDefaultInterval(): int
     {
-        return 300;
+        return 300; // 5 minutes
     }
 }

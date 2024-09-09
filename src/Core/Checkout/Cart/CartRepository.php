@@ -26,55 +26,118 @@ final class CartRepository
     }
 
     /**
-     * Returns an array of `cart` records which can be considered as "abandoned".
+     * Finds and returns an array of `cart` records that are considered "abandoned" and meet specific criteria.
+     * 
+     * This method performs the following steps:
+     * 1. Retrieves cart records that are not marked as abandoned OR have been updated after being marked as abandoned. Depending on the $retrieveUpdated parameter.
+     * 2. Filters carts to include only those with a customer ID.
+     * 3. Excludes carts marked for recalculation.
+     * 4. Adds customer ID, total price, and line item count to each cart.
+     * 5. Removes carts associated with inactive customers.
+     * 6. Removes carts for customers who have placed an order after the cart was created.
+     * 
+     * @param bool $retrieveUpdated Optional parameter to specify whether to retrieve updated abandoned carts.
+     *                              If true, retrieves updated abandoned carts. If false, retrieves new abandoned carts.
+     *                              Default is false.
+     * @return array An array of abandoned cart records with additional details.
      * @throws Exception
      */
-    public function findMarkableAsAbandoned(): array
+    public function findAbandonedCartsWithCriteria(bool $retrieveUpdated = false): array
     {
-        $selectAbandonedCartTokensQuery = $this->getAbandonedCartTokensQuery();
+        $selectAbandonedCartTokensQuery = $this->generateAbandonedCartTokensQuery();
 
-        $field = $this->payloadExists() ? 'payload' : 'cart';
-        $statement = $this->connection->prepare(<<<SQL
-            SELECT
-                cart.token,
-                cart.name,
-                cart.$field AS payload,
-                cart.price,
-                cart.line_item_count,
-                LOWER(HEX(cart.currency_id)) AS currency_id,
-                LOWER(HEX(cart.shipping_method_id)) AS shipping_method_id,
-                LOWER(HEX(cart.payment_method_id)) AS payment_method_id,
-                LOWER(HEX(cart.country_id)) AS country_id,
-                LOWER(HEX(cart.customer_id)) AS customer_id,
-                LOWER(HEX(cart.sales_channel_id)) AS sales_channel_id,
-                cart.created_at
-            FROM cart
+        $qb = $this->connection->createQueryBuilder();
 
-            LEFT JOIN abandoned_cart ON cart.token = abandoned_cart.cart_token
-                AND cart.sales_channel_id = abandoned_cart.sales_channel_id
+        $qb->select('c.token, c.payload, c.created_at', 'ac.updated_at')
+            ->from('cart', 'c')
+            ->leftJoin('c', 'abandoned_cart', 'ac', 'c.token = ac.cart_token')
+            ->where($qb->expr()->in('c.token', $selectAbandonedCartTokensQuery))
+            ->orderBy('c.created_at', 'ASC')
+            ->setMaxResults(100);
 
-            WHERE abandoned_cart.id IS NULL
-            AND cart.`token` IN ($selectAbandonedCartTokensQuery)
-            AND cart.`customer_id` IS NOT NULL
-            AND cart.`customer_id` != ''
+        if (!$retrieveUpdated) {
+            $qb->andWhere($qb->expr()->isNull('ac.id')); // Not yet marked as abandoned
+        } else{
+            // Updated after marked as abandoned
+            $qb->andWhere($qb->expr()->gt('c.created_at', 'ac.created_at'));
+            // and updated is null
+            $qb->andWhere($qb->expr()->isNull('ac.updated_at'));
+            // OR updated after updated
+            $qb->orWhere($qb->expr()->gt('c.created_at', 'ac.updated_at'));
+        }
 
-            ORDER BY cart.created_at
-            LIMIT 100;
-        SQL);
+        $data = $qb->executeQuery()->fetchAllAssociative();
 
-        return $statement
-            ->executeQuery()
-            ->fetchAllAssociative();
+        // Return only carts with a customer ID.
+        $data = array_filter($data, function ($cart) {
+            $cart = unserialize($cart['payload']);
+
+            $firstAddress = $cart->getDeliveries()->getAddresses()->first();
+            if($firstAddress) {
+                $customerId = $firstAddress->getCustomerId();
+                if($customerId) {
+                    return true;
+                }
+            }
+            return false;
+        });
+
+        // Loop over results
+        foreach($data as $key => $cart) {
+            $cart = unserialize($cart['payload']);
+
+            // Remove carts that are marked as recalculated
+            if($cart->getBehavior()->isRecalculation()) {
+                unset($data[$key]);
+                continue;
+            }
+
+            // Add customer ID to result
+            $data[$key]['customer_id'] = $cart->getDeliveries()->getAddresses()->first()->getCustomerId();
+
+            // Add price to each result
+            $data[$key]['price'] = $cart->getPrice()->getTotalPrice();
+
+            // Add line item count to result
+            $data[$key]['line_item_count'] = count($cart->getLineItems());
+
+            // Remove customers that are inactive
+            $qb = $this->connection->createQueryBuilder();
+            $qb->select('c.id')
+                ->from('customer', 'c')
+                ->where($qb->expr()->eq('c.id', ':customerId'))
+                ->andWhere($qb->expr()->eq('c.active', ':active'))
+                ->setParameter('customerId', hex2bin($data[$key]['customer_id']))
+                ->setParameter('active', 1);
+            $result = $qb->executeQuery()->fetchOne();
+
+            if($result === false) {
+                unset($data[$key]);
+                continue;
+            }
+
+            // Remove customers that have placed an order after the cart was created
+            $qb = $this->connection->createQueryBuilder();
+            $qb->select('oc.id')
+                ->from('order_customer', 'oc')
+                ->leftJoin('oc', 'customer', 'c', 'oc.customer_id = c.id')
+                ->where($qb->expr()->eq('oc.customer_id', ':customerId'))
+                ->andWhere($qb->expr()->gte('oc.created_at', ':cartCreatedAt'))
+                ->setParameter('customerId', $data[$key]['customer_id'])
+                ->setParameter('cartCreatedAt', $data[$key]['created_at']);
+        }
+
+        return $data;
     }
 
     /**
-     * Returns an array of `cart` tokens which no longer exists or considered as "abandoned"
-     * but still has an `abandoned_cart` association.
+     * Returns an array of cart tokens that are considered "abandoned" and no longer exist in the cart table,
+     * but still have an association in the abandoned_cart table.
      * @throws Exception
      */
-    public function findTokensForUpdatedOrDeletedWithAbandonedCartAssociation(): array
+    public function findOrphanedAbandonedCartTokens(): array
     {
-        $selectAbandonedCartTokensQuery = $this->getAbandonedCartTokensQuery();
+        $selectAbandonedCartTokensQuery = $this->generateAbandonedCartTokensQuery();
 
         $statement = $this->connection->prepare(<<<SQL
             SELECT
@@ -94,22 +157,16 @@ final class CartRepository
     }
 
     /**
-     * Can be used for backwards compatibility fixes for < Shopware 6.4.12.
-     * @throws Exception
+     * Generates an SQL query to retrieve tokens of carts that are considered abandoned.
+     *
+     * This function constructs an SQL query that selects the most recent cart token
+     * for each customer whose cart has been abandoned. A cart is considered abandoned
+     * if it was created before a certain time threshold, which is determined by the
+     * 'MailCampaignsAbandonedCart.config.markAbandonedAfter' configuration setting.
+     *
+     * @return string The SQL query string to retrieve abandoned cart tokens.
      */
-    private function payloadExists(): bool
-    {
-        $statement = $this->connection->prepare(<<<SQL
-            SHOW COLUMNS FROM cart;
-        SQL);
-
-        return in_array('payload', array_column(
-            $statement->executeQuery()->fetchAllAssociative(),
-            'Field'
-        ));
-    }
-
-    private function getAbandonedCartTokensQuery(): string
+    private function generateAbandonedCartTokensQuery(): string
     {
         $considerAbandonedAfter = (new DateTime())->modify(sprintf(
             '-%d seconds',
@@ -120,26 +177,12 @@ final class CartRepository
             SELECT
                 /* A customer can have multiple cart records. Select the most recent. */
                 SUBSTRING_INDEX(
-                    GROUP_CONCAT(cart.`token` ORDER BY IFNULL(cart.updated_at, cart.created_at) DESC),
+                    GROUP_CONCAT(cart.`token` ORDER BY cart.created_at DESC),
                     ',',
                     1
                 ) AS `token`
             FROM cart
-
-            /* Exclude for inactive customers. */
-            JOIN customer ON cart.customer_id = customer.id
-                AND cart.sales_channel_id = customer.sales_channel_id
-                AND customer.active = 1
-
-            /* Exclude for customers with an order placed after their last cart record. */
-            LEFT JOIN order_customer ON customer.id = order_customer.customer_id
-                AND order_customer.created_at >= IFNULL(cart.updated_at, cart.created_at)
-
-            WHERE IFNULL(cart.updated_at, cart.created_at) < '{$considerAbandonedAfter->format('Y-m-d H:i:s.v')}'
-            AND (cart.`name` != 'recalculation' OR cart.`name` IS NULL)
-            AND order_customer.order_id IS NULL
-
-            GROUP BY cart.customer_id
+            WHERE cart.created_at < '{$considerAbandonedAfter->format('Y-m-d H:i:s.v')}'
 
             /* Prevent empty subselect. */
             UNION

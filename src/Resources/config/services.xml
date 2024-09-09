@@ -28,11 +28,26 @@
             <tag name="console.command"/>
         </service>
 
+        <service id="MailCampaigns\AbandonedCart\Command\UpdateAbandonedCartCommand">
+            <argument type="service" id="MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager"/>
+            <tag name="console.command"/>
+        </service>
+
         <service id="MailCampaigns\AbandonedCart\Service\ScheduledTask\DeleteAbandonedCartTask">
             <tag name="shopware.scheduled.task" />
         </service>
 
         <service id="MailCampaigns\AbandonedCart\Service\ScheduledTask\DeleteAbandonedCartTaskHandler">
+            <argument type="service" id="MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager" />
+            <argument type="service" id="scheduled_task.repository" />
+            <tag name="messenger.message_handler" />
+        </service>
+
+        <service id="MailCampaigns\AbandonedCart\Service\ScheduledTask\UpdateAbandonedCartTask">
+            <tag name="shopware.scheduled.task" />
+        </service>
+
+        <service id="MailCampaigns\AbandonedCart\Service\ScheduledTask\UpdateAbandonedCartTaskHandler">
             <argument type="service" id="MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager" />
             <argument type="service" id="scheduled_task.repository" />
             <tag name="messenger.message_handler" />

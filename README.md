@@ -1,9 +1,11 @@
-# MailCampaigns - "Abandoned" cart plugin
-This [Shopware 6](https://www.shopware.com/en/products/shopware-6/) plugin allows you to automatically mark carts as
-"abandoned" after a configured number of seconds. Currently, the "abandoned" carts are only available through the
-custom */abandoned-cart* API endpoints.
+# MailCampaigns - "Abandoned" cart plugin for Shopware 6.6
+This [Shopware 6](https://www.shopware.com/en/products/shopware-6/) plugin adds an the `/abandoned-cart` API endpoint that allows you to retrieve shopping carts that your customers have left behind. 
+After a configured number of seconds a cart can be considered as abandoned.
+It only returns carts of active known customers, that have not been converted to an order yet. This way you can send a reminder to your customers to complete their order. 
 
 ## Getting started
+
+Either download the .zip file and upload it in your Shopware 6 Admin panel via *Extensions > My extensions > Upload extension* or install it via Composer.
 
 ### Composer
 This plugin is currently only available as a [Composer](https://getcomposer.org/) package
@@ -34,7 +36,7 @@ bin/console cache:clear
 
 ### Configuration
 To determine when a cart can be considered "abandoned" you can configure this after activating the plugin.
-The value you enter is the number of seconds (default 3600, which is one hour) after a cart is created or updated.
+The value you enter is the number of seconds (default 3600, which is one hour) after a cart is created.
 
 Make sure the settings for the carts make sense in combination with the setting in our plugin. In other words, the setting
 for carts 'Time in minutes for a customer to finalize a transaction' should be longer than the setting in our plugin.
