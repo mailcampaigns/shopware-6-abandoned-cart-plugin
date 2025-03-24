@@ -7,6 +7,8 @@ namespace MailCampaigns\AbandonedCart\Core\Checkout\Cart;
 use DateTime;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
+use MailCampaigns\AbandonedCart\Service\ShopwareVersionHelper;
+use Psr\Log\LoggerInterface;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 
 /**
@@ -14,15 +16,12 @@ use Shopware\Core\System\SystemConfig\SystemConfigService;
  */
 final class CartRepository
 {
-    private Connection $connection;
-    private SystemConfigService $systemConfigService;
-
     public function __construct(
-        Connection $connection,
-        SystemConfigService $systemConfigService
+        private readonly Connection $connection,
+        private readonly SystemConfigService $systemConfigService,
+        private readonly LoggerInterface $logger,
+        private readonly ShopwareVersionHelper $versionHelper,
     ) {
-        $this->connection = $connection;
-        $this->systemConfigService = $systemConfigService;
     }
 
     /**
@@ -44,27 +43,52 @@ final class CartRepository
      */
     public function findAbandonedCartsWithCriteria(bool $retrieveUpdated = false): array
     {
+
         $selectAbandonedCartTokensQuery = $this->generateAbandonedCartTokensQuery();
 
         $qb = $this->connection->createQueryBuilder();
 
-        $qb->select('c.token, c.payload, c.created_at', 'ac.updated_at')
-            ->from('cart', 'c')
-            ->leftJoin('c', 'abandoned_cart', 'ac', 'c.token = ac.cart_token')
-            ->where($qb->expr()->in('c.token', $selectAbandonedCartTokensQuery))
-            ->orderBy('c.created_at', 'ASC')
-            ->setMaxResults(100);
+        if($this->versionHelper->getMajorMinorShopwareVersion() === '6.5') {
+            $qb->select('c.token, c.payload, c.created_at, c.updated_at AS c_updated_at, ac.updated_at AS ac_updated_at')
+                ->from('cart', 'c')
+                ->leftJoin('c', 'abandoned_cart', 'ac', 'c.token = ac.cart_token')
+                ->where($qb->expr()->in('c.token', $selectAbandonedCartTokensQuery))
+                ->orderBy('c.created_at', 'ASC')
+                ->setMaxResults(100);
 
-        if (!$retrieveUpdated) {
-            $qb->andWhere($qb->expr()->isNull('ac.id')); // Not yet marked as abandoned
-        } else{
-            // Updated after marked as abandoned
-            $qb->andWhere($qb->expr()->gt('c.created_at', 'ac.created_at'));
-            // and updated is null
-            $qb->andWhere($qb->expr()->isNull('ac.updated_at'));
-            // OR updated after updated
-            $qb->orWhere($qb->expr()->gt('c.created_at', 'ac.updated_at'));
+            if (!$retrieveUpdated) {
+                $qb->andWhere($qb->expr()->isNull('ac.id')); // Not yet marked as abandoned
+            } else{
+                // Updated after marked as abandoned
+                $qb->andWhere($qb->expr()->gt('c.created_at', 'ac.created_at'));
+                // and updated is null
+                $qb->andWhere($qb->expr()->isNull('ac.updated_at'));
+                // OR updated after updated
+                $qb->orWhere($qb->expr()->gt('c.created_at', 'ac.updated_at'));
+            }
+        } else if($this->versionHelper->getMajorMinorShopwareVersion() === '6.6') {
+            $qb->select('c.token, c.payload, c.created_at', 'ac.updated_at')
+                ->from('cart', 'c')
+                ->leftJoin('c', 'abandoned_cart', 'ac', 'c.token = ac.cart_token')
+                ->where($qb->expr()->in('c.token', $selectAbandonedCartTokensQuery))
+                ->orderBy('c.created_at', 'ASC')
+                ->setMaxResults(100);
+
+            if (!$retrieveUpdated) {
+                $qb->andWhere($qb->expr()->isNull('ac.id')); // Not yet marked as abandoned
+            } else{
+                // Updated after marked as abandoned
+                $qb->andWhere($qb->expr()->gt('c.created_at', 'ac.created_at'));
+                // and updated is null
+                $qb->andWhere($qb->expr()->isNull('ac.updated_at'));
+                // OR updated after updated
+                $qb->orWhere($qb->expr()->gt('c.created_at', 'ac.updated_at'));
+            }
         }
+
+        // dump query to log
+        $query = $qb->getSQL();
+        $this->logger->info($query);
 
         $data = $qb->executeQuery()->fetchAllAssociative();
 
@@ -86,7 +110,7 @@ final class CartRepository
         foreach($data as $key => $cart) {
             $cart = unserialize($cart['payload']);
 
-            // Remove carts that are marked as recalculated
+            // Remove carts that are marked as recalculated since they can be considered as garbage
             if($cart->getBehavior()->isRecalculation()) {
                 unset($data[$key]);
                 continue;
@@ -173,21 +197,41 @@ final class CartRepository
             $this->systemConfigService->get('MailCampaignsAbandonedCart.config.markAbandonedAfter')
         ));
 
-        return <<<SQL
-            SELECT
-                /* A customer can have multiple cart records. Select the most recent. */
-                SUBSTRING_INDEX(
-                    GROUP_CONCAT(cart.`token` ORDER BY cart.created_at DESC),
-                    ',',
-                    1
-                ) AS `token`
-            FROM cart
-            WHERE cart.created_at < '{$considerAbandonedAfter->format('Y-m-d H:i:s.v')}'
+        if($this->versionHelper->getMajorMinorShopwareVersion() === '6.5') {
+            return <<<SQL
+                SELECT
+                    SUBSTRING_INDEX(
+                        GROUP_CONCAT(cart.`name` ORDER BY IFNULL(cart.updated_at, cart.created_at) DESC),
+                        ',',
+                        1
+                    ) AS `token`
+                FROM cart
+                WHERE IFNULL(cart.updated_at, cart.created_at) < '{$considerAbandonedAfter->format('Y-m-d H:i:s.v')}'
+                AND cart.customer_id IS NOT NULL
+                
+                UNION
 
-            /* Prevent empty subselect. */
-            UNION
+                SELECT 'dummy-cart'
+            SQL;
+        }
+        else if ($this->versionHelper->getMajorMinorShopwareVersion() === '6.6') {
+            return <<<SQL
+                SELECT
+                    SUBSTRING_INDEX(
+                        GROUP_CONCAT(cart.`token` ORDER BY cart.created_at DESC),
+                        ',',
+                        1
+                    ) AS `token`
+                FROM cart
+                WHERE cart.created_at < '{$considerAbandonedAfter->format('Y-m-d H:i:s.v')}'
 
-            SELECT 'dummy-cart'
-        SQL;
+                UNION
+
+                SELECT 'dummy-cart'
+            SQL;
+        }
+        else {
+            throw new \RuntimeException('Unsupported Shopware version');
+        }
     }
 }
