@@ -56,15 +56,16 @@ final class CartRepository
                 ->orderBy('c.created_at', 'ASC')
                 ->setMaxResults(100);
 
-            if (!$retrieveUpdated) {
-                $qb->andWhere($qb->expr()->isNull('ac.id')); // Not yet marked as abandoned
-            } else{
-                // Updated after marked as abandoned
-                $qb->andWhere($qb->expr()->gt('c.created_at', 'ac.created_at'));
-                // and updated is null
-                $qb->andWhere($qb->expr()->isNull('ac.updated_at'));
-                // OR updated after updated
-                $qb->orWhere($qb->expr()->gt('c.created_at', 'ac.updated_at'));
+            if (!$retrieveUpdated) { // Not yet marked as abandoned
+                $qb->andWhere($qb->expr()->isNull('ac.id'));
+            } else{ // Updated after marked as abandoned
+                $qb->andWhere($qb->expr()->gt('c.updated_at', 'c.created_at'));
+                $qb->andWhere(
+                    $qb->expr()->or(
+                        $qb->expr()->isNull('ac.updated_at'),
+                        $qb->expr()->gt('c.updated_at', 'ac.updated_at')
+                    )
+                );
             }
         } else if($this->versionHelper->getMajorMinorShopwareVersion() === '6.6') {
             $qb->select('c.token, c.payload, c.created_at', 'ac.updated_at')
@@ -74,14 +75,11 @@ final class CartRepository
                 ->orderBy('c.created_at', 'ASC')
                 ->setMaxResults(100);
 
-            if (!$retrieveUpdated) {
-                $qb->andWhere($qb->expr()->isNull('ac.id')); // Not yet marked as abandoned
-            } else{
-                // Updated after marked as abandoned
+            if (!$retrieveUpdated) { // Not yet marked as abandoned
+                $qb->andWhere($qb->expr()->isNull('ac.id'));
+            } else{ // Updated after marked as abandoned
                 $qb->andWhere($qb->expr()->gt('c.created_at', 'ac.created_at'));
-                // and updated is null
                 $qb->andWhere($qb->expr()->isNull('ac.updated_at'));
-                // OR updated after updated
                 $qb->orWhere($qb->expr()->gt('c.created_at', 'ac.updated_at'));
             }
         }
