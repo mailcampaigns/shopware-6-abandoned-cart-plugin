@@ -1,49 +1,113 @@
-# MailCampaigns - "Abandoned" cart plugin for Shopware 6.6
-This [Shopware 6](https://www.shopware.com/en/products/shopware-6/) plugin adds an the `/abandoned-cart` API endpoint that allows you to retrieve shopping carts that your customers have left behind. 
-After a configured number of seconds a cart can be considered as abandoned.
-It only returns carts of active known customers, that have not been converted to an order yet. This way you can send a reminder to your customers to complete their order. 
+# 🛒 MailCampaigns - "Abandoned" Cart Plugin for Shopware 6
 
-Check the releases for support for previous versions of Shopware 6. 
+![Shopware 6](https://img.shields.io/badge/Shopware-6.x-blue?logo=shopware)
+![Plugin Version](https://img.shields.io/github/v/release/mailcampaigns/shopware-6-abandoned-cart-plugin)
+![License](https://img.shields.io/github/license/mailcampaigns/shopware-6-abandoned-cart-plugin)
 
-## Getting started
+This [Shopware 6](https://www.shopware.com/en/products/shopware-6/) plugin adds an `/abandoned-cart` API endpoint that allows you to retrieve shopping carts that your customers have left behind.
 
-Either download the .zip file and upload it in your Shopware 6 Admin panel via *Extensions > My extensions > Upload extension* or install it via Composer.
+After a configured number of **seconds**, a cart can be considered abandoned.  
+It only returns carts of **active known customers** that have **not been converted to an order** yet.
 
-### Composer
-This plugin is currently only available as a [Composer](https://getcomposer.org/) package
-and can be installed with the following command:
+Use this data to send automated cart recovery reminders to increase your conversions.
+
+---
+
+## 🎯 Features
+
+- 🔗 Adds `/abandoned-cart` API endpoint
+- 👤 Only returns known, non-order customers
+- ⏱️ Configurable timeout in seconds (default: 3600)
+- 🛠️ Compatible with scheduled tasks & message queue
+- ✅ Supports Shopware 6.4 → 6.6
+
+---
+
+## 🛍️ Supported Shopware Versions
+
+| Shopware Version | Plugin Version | Download |
+|------------------|----------------|----------|
+| 6.4              | 1.7.1          | [🔗 View Release](https://github.com/mailcampaigns/shopware-6-abandoned-cart-plugin/releases/tag/1.7.1) |
+| 6.5              | 3.0.1          | [🔗 View Release](https://github.com/mailcampaigns/shopware-6-abandoned-cart-plugin/releases/tag/3.0.1) |
+| 6.6              | 3.0.1          | [🔗 View Release](https://github.com/mailcampaigns/shopware-6-abandoned-cart-plugin/releases/tag/3.0.1) |
+
+> ✅ Note: Plugin version `3.0.1` supports both Shopware `6.5` and `6.6`.
+
+---
+
+## ⚙️ Example API Request
+
+```http
+GET /store-api/abandoned-cart?limit=10
+```
+
+## Example response:
+```
+[
+  {
+    "customerId": "ab1c-23d4...",
+    "cart": { ... },
+    "createdAt": "2024-01-01T12:00:00Z"
+  },
+  ...
+]
+```
+
+## 🚀 Getting Started
+
+You can either upload the `.zip` manually or install via Composer.
+
+### 🔌 Composer Installation
 
 ```bash
 composer require mailcampaigns/shopware-6-abandoned-cart-plugin
-```
-
-After that, run this command so Shopware knows about its existence:
-
-```bash
 bin/console plugin:refresh
 ```
 
-### Activate plugin
-After installation, this plugin still needs to be activated. This can be done via the **Admin** panel
-(**Extensions > My extensions**) or by running the following command:
+### 🔄 Activate Plugin
 
+**Option 1 (Admin panel):**  
+Go to `Extensions > My extensions` and activate the plugin.
+
+**Option 2 (CLI):**
 ```bash
 bin/console plugin:install --activate MailCampaignsAbandonedCart
-```
-
-Shopware recommends clearing the cache after running the above command:
-```bash
 bin/console cache:clear
 ```
 
-### Configuration
-To determine when a cart can be considered "abandoned" you can configure this after activating the plugin.
-The value you enter is the number of seconds (default 3600, which is one hour) after a cart is created.
+## 🔧 Configuration
 
-Make sure the settings for the carts make sense in combination with the setting in our plugin. In other words, the setting
-for carts 'Time in minutes for a customer to finalize a transaction' should be longer than the setting in our plugin.
+After activating, configure the cart timeout setting:  
+> "Number of seconds after which a cart is considered abandoned" (default: `3600`)
 
-> **Note:** Abandoned carts are generated using [scheduled tasks] and therefore depend on the [message queue].
+Make sure this timeout is **shorter** than Shopware's own cart expiration setting:  
+> `Time in minutes for a customer to finalize a transaction`
 
-[scheduled tasks]: https://developer.shopware.com/docs/guides/plugins/plugins/plugin-fundamentals/add-scheduled-task#executing-the-scheduled-task
+> 🧠 Abandoned carts are generated using [scheduled tasks] and depend on the [message queue].
+
+[scheduled tasks]: https://developer.shopware.com/docs/guides/plugins/plugins/plugin-fundamentals/add-scheduled-task#executing-the-scheduled-task  
 [message queue]: https://developer.shopware.com/docs/guides/hosting/infrastructure/message-queue
+
+---
+
+## 📦 Release Overview
+
+| Plugin Version | Compatible Shopware Versions |
+|----------------|-------------------------------|
+| 1.7.1          | 6.4                           |
+| 2.0.0          | 6.5                           |
+| 3.0.1          | 6.5, 6.6                      |
+
+---
+
+## 🤝 Contributing
+
+Pull requests, issues, and feedback are welcome.  
+For support, contact us at [support@mailcampaigns.com](mailto:support@mailcampaigns.com)
+
+---
+
+## 🔗 More
+
+Check all releases:  
+👉 [https://github.com/mailcampaigns/shopware-6-abandoned-cart-plugin/releases](https://github.com/mailcampaigns/shopware-6-abandoned-cart-plugin/releases)
