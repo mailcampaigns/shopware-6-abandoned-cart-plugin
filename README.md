@@ -103,7 +103,7 @@ Make sure this timeout is **shorter** than Shopware's own cart expiration settin
 ## 🤝 Contributing
 
 Pull requests, issues, and feedback are welcome.  
-For support, contact us at [support@mailcampaigns.com](mailto:support@mailcampaigns.com)
+For support, contact us at [support@mailcampaigns.nl](mailto:support@mailcampaigns.nl)
 
 ---
 
