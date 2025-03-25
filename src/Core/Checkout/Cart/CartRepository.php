@@ -8,7 +8,6 @@ use DateTime;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use MailCampaigns\AbandonedCart\Service\ShopwareVersionHelper;
-use Psr\Log\LoggerInterface;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 
 /**
@@ -19,7 +18,6 @@ final class CartRepository
     public function __construct(
         private readonly Connection $connection,
         private readonly SystemConfigService $systemConfigService,
-        private readonly LoggerInterface $logger,
         private readonly ShopwareVersionHelper $versionHelper,
     ) {
     }
@@ -83,10 +81,6 @@ final class CartRepository
                 $qb->orWhere($qb->expr()->gt('c.created_at', 'ac.updated_at'));
             }
         }
-
-        // dump query to log
-        $query = $qb->getSQL();
-        $this->logger->info($query);
 
         $data = $qb->executeQuery()->fetchAllAssociative();
 
