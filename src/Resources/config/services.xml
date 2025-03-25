@@ -39,8 +39,8 @@
         </service>
 
         <service id="MailCampaigns\AbandonedCart\Service\ScheduledTask\DeleteAbandonedCartTaskHandler">
-            <argument type="service" id="MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager" />
             <argument type="service" id="scheduled_task.repository" />
+            <argument type="service" id="MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager" />
             <tag name="messenger.message_handler" />
         </service>
 
@@ -49,8 +49,8 @@
         </service>
 
         <service id="MailCampaigns\AbandonedCart\Service\ScheduledTask\UpdateAbandonedCartTaskHandler">
-            <argument type="service" id="MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager" />
             <argument type="service" id="scheduled_task.repository" />
+            <argument type="service" id="MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager" />
             <tag name="messenger.message_handler" />
         </service>
 
@@ -59,8 +59,8 @@
         </service>
 
         <service id="MailCampaigns\AbandonedCart\Service\ScheduledTask\MarkAbandonedCartTaskHandler">
-            <argument type="service" id="MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager" />
             <argument type="service" id="scheduled_task.repository" />
+            <argument type="service" id="MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager" />
             <tag name="messenger.message_handler" />
         </service>
 
