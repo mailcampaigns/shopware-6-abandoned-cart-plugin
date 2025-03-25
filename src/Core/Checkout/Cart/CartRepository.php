@@ -231,7 +231,7 @@ final class CartRepository
             SQL;
         }
         else {
-            throw new \RuntimeException('Unsupported Shopware version');
+            throw new \RuntimeException('Unsupported Shopware version ' . $this->versionHelper->getMajorMinorShopwareVersion());
         }
     }
 }
