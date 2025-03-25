@@ -11,6 +11,7 @@ class ShopwareVersionHelper
     public function getMajorMinorShopwareVersion(): string
     {
         $version = Kernel::SHOPWARE_FALLBACK_VERSION;
-        return substr($version, 0, strrpos($version, '.')); // Remove patch version
+        $versionParts = explode('.', $version); // Split version by dots
+        return $versionParts[0] . '.' . $versionParts[1]; // Return major and minor version
     }
 }
