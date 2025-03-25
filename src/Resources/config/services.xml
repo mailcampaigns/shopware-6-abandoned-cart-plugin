@@ -11,6 +11,8 @@
         <service id="MailCampaigns\AbandonedCart\Core\Checkout\Cart\CartRepository">
             <argument type="service" id="Doctrine\DBAL\Connection"/>
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="Psr\Log\LoggerInterface"/>
+            <argument type="service" id="MailCampaigns\AbandonedCart\Service\ShopwareVersionHelper"/>
         </service>
 
         <service id="MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager">
@@ -62,5 +64,7 @@
             <argument type="service" id="scheduled_task.repository" />
             <tag name="messenger.message_handler" />
         </service>
+
+        <service id="MailCampaigns\AbandonedCart\Service\ShopwareVersionHelper" />
     </services>
 </container>

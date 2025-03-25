@@ -8,7 +8,13 @@
         <input-field type="int">
             <name>markAbandonedAfter</name>
             <label>After how many seconds is a cart considered "abandoned"?</label>
+            <helpText>
+                This plugin requires the cart settings to be configured properly. 
+                The setting "Time in minutes for a customer to finalize a transaction" 
+                (found in Settings > Cart settings) should always be longer than this setting.
+            </helpText>
             <defaultValue>3600</defaultValue>
         </input-field>
+        
     </card>
 </config>
