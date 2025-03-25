@@ -201,7 +201,7 @@ final class CartRepository
             return <<<SQL
                 SELECT
                     SUBSTRING_INDEX(
-                        GROUP_CONCAT(cart.`name` ORDER BY IFNULL(cart.updated_at, cart.created_at) DESC),
+                        GROUP_CONCAT(cart.`token` ORDER BY IFNULL(cart.updated_at, cart.created_at) DESC),
                         ',',
                         1
                     ) AS `token`
