@@ -46,8 +46,9 @@ final class CartRepository
 
         $qb = $this->connection->createQueryBuilder();
 
+        $field = $this->payloadExists() ? 'payload' : 'cart';
         if($this->versionHelper->getMajorMinorShopwareVersion() === '6.5') {
-            $qb->select('c.token, c.payload, c.created_at, c.updated_at AS c_updated_at, ac.updated_at AS ac_updated_at')
+            $qb->select("c.token, cart.$field AS payload, c.created_at, c.updated_at AS c_updated_at, ac.updated_at AS ac_updated_at")
                 ->from('cart', 'c')
                 ->leftJoin('c', 'abandoned_cart', 'ac', 'c.token = ac.cart_token')
                 ->where($qb->expr()->in('c.token', $selectAbandonedCartTokensQuery))
@@ -66,7 +67,7 @@ final class CartRepository
                 );
             }
         } else if($this->versionHelper->getMajorMinorShopwareVersion() === '6.6') {
-            $qb->select('c.token, c.payload, c.created_at', 'ac.updated_at')
+            $qb->select("c.token, cart.$field AS payload, c.created_at', 'ac.updated_at")
                 ->from('cart', 'c')
                 ->leftJoin('c', 'abandoned_cart', 'ac', 'c.token = ac.cart_token')
                 ->where($qb->expr()->in('c.token', $selectAbandonedCartTokensQuery))
@@ -225,5 +226,22 @@ final class CartRepository
         else {
             throw new \RuntimeException('Unsupported Shopware version ' . $this->versionHelper->getMajorMinorShopwareVersion());
         }
+    }
+
+    /**
+     * In some Shopware installations, the `cart` table may not have a `payload` column, but a `cart` column instead.
+     * This method checks if the `payload` column exists in the `cart` table.
+     * @return bool True if the `payload` column exists, false otherwise.
+     */
+    private function payloadExists(): bool
+    {
+        $statement = $this->connection->prepare(<<<SQL
+            SHOW COLUMNS FROM cart;
+        SQL);
+
+        return in_array('payload', array_column(
+            $statement->executeQuery()->fetchAllAssociative(),
+            'Field'
+        ));
     }
 }
