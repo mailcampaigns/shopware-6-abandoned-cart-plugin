@@ -1,7 +1,7 @@
 {
     "name": "mailcampaigns/shopware-6-abandoned-cart-plugin",
     "description": "A Shopware 6 plugin for \"abandoned\" carts.",
-    "version": "3.0.3",
+    "version": "3.0.4",
     "type": "shopware-platform-plugin",
     "license": "MIT",
     "authors": [
