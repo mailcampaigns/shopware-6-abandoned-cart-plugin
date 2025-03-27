@@ -35,24 +35,6 @@ Use this data to send automated cart recovery reminders to increase your convers
 
 ---
 
-## ⚙️ Example API Request
-
-```http
-GET /store-api/abandoned-cart?limit=10
-```
-
-## Example response:
-```
-[
-  {
-    "customerId": "ab1c-23d4...",
-    "cart": { ... },
-    "createdAt": "2024-01-01T12:00:00Z"
-  },
-  ...
-]
-```
-
 ## 🚀 Getting Started
 
 You can either upload the `.zip` manually or install via Composer.
@@ -83,12 +65,78 @@ After activating, configure the cart timeout setting:
 Make sure this timeout is **less than** than Shopware's own cart expiration setting:  
 > `Time in minutes for a customer to finalize a transaction`
 
+Make sure to give the API user the necessary permissions to access the `/abandoned-cart` endpoint.
+- `abandoned_cart:read` permission to **read** abandoned carts
+- `abandoned_cart:update` permission to **update** abandoned carts
+- `abandoned_cart:delete` permission to **delete** abandoned carts
+
 > 🧠 Abandoned carts are generated using [scheduled tasks] and depend on the [message queue].
 
 [scheduled tasks]: https://developer.shopware.com/docs/guides/plugins/plugins/plugin-fundamentals/add-scheduled-task#executing-the-scheduled-task  
 [message queue]: https://developer.shopware.com/docs/guides/hosting/infrastructure/message-queue
 
 ---
+
+## ⚙️ Example API Request
+### 🔍 Retrieve Abandoned Carts
+```http
+GET /api/abandoned-cart
+```
+Optional query parameters:
+- `limit` (default: 10)
+- `page` (default: 1)
+
+```http
+GET /api/abandoned-cart?limit=5&page=1
+```
+
+## Example response:
+```
+{
+    "data": [
+        {
+            "id": "0195cd19f28e7327a24222075a312f39",
+            "type": "abandoned_cart",
+            "attributes": {
+                "cartToken": "aeyBUILGpDFdJQS77WMkQVn6wXgOHgC6",
+                "price": 40.0,
+                "lineItems": [
+                    {
+                        "id": "3ac014f329884b57a2cce5a29f34779c",
+                        "good": true,
+                        "type": "product",
+                        "label": "Main product, free shipping with highlighting",
+                        "quantity": 2,
+                        ...
+                    }
+                ],
+                "customerId": "0195cd14000773d7b6697f79bae4283d",
+                "createdAt": "2025-03-25T11:39:44.661+00:00",
+                "updatedAt": "2025-03-25T15:28:34.982+00:00",
+                ...
+            },
+            ...
+        }
+    ],
+    ...
+}
+```
+### 🔍 Retrieve, Update, or Delete a Specific Abandoned Cart
+
+You can interact with a specific abandoned cart using its unique `{id}`.
+
+#### Endpoint:
+```http
+GET /api/abandoned-cart/{id}
+PATCH /api/abandoned-cart/{id}
+DELETE /api/abandoned-cart/{id}
+```
+
+#### Methods:
+- **GET**: Retrieve details of a specific abandoned cart.
+- **PATCH**: Update specific fields of an abandoned cart.
+- **DELETE**: Remove an abandoned cart.
+
 
 ## 📦 Release Overview
 
