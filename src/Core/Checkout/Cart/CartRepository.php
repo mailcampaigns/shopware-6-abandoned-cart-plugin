@@ -67,7 +67,7 @@ final class CartRepository
                 );
             }
         } else if($this->versionHelper->getMajorMinorShopwareVersion() === '6.6') {
-            $qb->select("c.token, cart.$field AS payload, c.created_at', 'ac.updated_at")
+            $qb->select("c.token, cart.$field AS payload, c.created_at, ac.updated_at")
                 ->from('cart', 'c')
                 ->leftJoin('c', 'abandoned_cart', 'ac', 'c.token = ac.cart_token')
                 ->where($qb->expr()->in('c.token', $selectAbandonedCartTokensQuery))
