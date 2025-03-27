@@ -80,7 +80,7 @@ bin/console cache:clear
 After activating, configure the cart timeout setting:  
 > "Number of seconds after which a cart is considered abandoned" (default: `3600`)
 
-Make sure this timeout is **shorter** than Shopware's own cart expiration setting:  
+Make sure this timeout is **less than** than Shopware's own cart expiration setting:  
 > `Time in minutes for a customer to finalize a transaction`
 
 > 🧠 Abandoned carts are generated using [scheduled tasks] and depend on the [message queue].

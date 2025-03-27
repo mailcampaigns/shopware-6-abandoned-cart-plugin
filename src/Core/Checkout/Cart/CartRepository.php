@@ -26,7 +26,7 @@ final class CartRepository
      * Finds and returns an array of `cart` records that are considered "abandoned" and meet specific criteria.
      * 
      * This method performs the following steps:
-     * 1. Retrieves cart records that are not marked as abandoned OR have been updated after being marked as abandoned. Depending on the $retrieveUpdated parameter.
+     * 1. Retrieves cart records that are not marked as abandoned OR have been updated after being marked as abandoned. Depending on the value of the $retrieveUpdated parameter.
      * 2. Filters carts to include only those with a customer ID.
      * 3. Excludes carts marked for recalculation.
      * 4. Adds customer ID, total price, and line item count to each cart.

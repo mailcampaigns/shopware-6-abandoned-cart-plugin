@@ -21,7 +21,7 @@
             "en-GB": "MailCampaigns - \"Abandoned\" cart"
         },
         "description": {
-            "en-GB": "CRUD operations for \"abandoned\" carts."
+            "en-GB": "Create, Read, Update, Delete operations for 'abandoned' carts."
         }
     },
     "autoload": {

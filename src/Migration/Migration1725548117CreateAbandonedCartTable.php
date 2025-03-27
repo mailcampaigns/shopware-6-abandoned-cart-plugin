@@ -11,7 +11,7 @@ use Doctrine\DBAL\Exception;
 use Shopware\Core\Framework\Migration\MigrationStep;
 
 /**
- * Creates a table for {@see AbandonedCartEntity}.
+ * Creates a database table for storing abandoned cart data. {@see AbandonedCartEntity}.
  *
  * @author Max Seelig <max.seelig@heroesonly.com>
  */

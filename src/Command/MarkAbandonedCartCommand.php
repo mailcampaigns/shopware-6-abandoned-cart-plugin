@@ -16,7 +16,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 #[AsCommand(
     name: 'mailcampaigns:abandoned-cart:mark',
-    description: 'Marks shopping carts older than the configured time as "abandoned".'
+    description: "Marks shopping carts as 'abandoned' if they are older than the configured timeout."
 )]
 final class MarkAbandonedCartCommand extends Command
 {
