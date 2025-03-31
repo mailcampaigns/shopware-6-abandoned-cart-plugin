@@ -28,10 +28,10 @@ Use this data to send automated cart recovery reminders to increase your convers
 | Shopware Version | Plugin Version | Download |
 |------------------|----------------|----------|
 | 6.4              | 1.7.1          | [🔗 View Release](https://github.com/mailcampaigns/shopware-6-abandoned-cart-plugin/releases/tag/1.7.1) |
-| 6.5              | 3.0.4          | [🔗 View Release](https://github.com/mailcampaigns/shopware-6-abandoned-cart-plugin/releases/tag/3.0.4) |
-| 6.6              | 3.0.4          | [🔗 View Release](https://github.com/mailcampaigns/shopware-6-abandoned-cart-plugin/releases/tag/3.0.4) |
+| 6.5              | 3.0.5          | [🔗 View Release](https://github.com/mailcampaigns/shopware-6-abandoned-cart-plugin/releases/tag/3.0.5) |
+| 6.6              | 3.0.5          | [🔗 View Release](https://github.com/mailcampaigns/shopware-6-abandoned-cart-plugin/releases/tag/3.0.5) |
 
-> ✅ Note: Plugin version `3.0.4` supports both Shopware `6.5` and `6.6`.
+> ✅ Note: Plugin version `3.0.5` supports both Shopware `6.5` and `6.6`.
 
 ---
 
@@ -144,7 +144,7 @@ DELETE /api/abandoned-cart/{id}
 |----------------|-------------------------------|
 | 1.7.1          | 6.4                           |
 | 2.0.0          | 6.5                           |
-| 3.0.4          | 6.5, 6.6                      |
+| 3.0.5          | 6.5, 6.6                      |
 
 ---
 
