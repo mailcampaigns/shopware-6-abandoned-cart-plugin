@@ -7,6 +7,7 @@ namespace MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart;
 use MailCampaigns\AbandonedCart\Exception\InvalidCartDataException;
 use MailCampaigns\AbandonedCart\Exception\MissingCartDataException;
 use Shopware\Core\Checkout\Cart\Cart;
+use Shopware\Core\Framework\Adapter\Cache\CacheValueCompressor;
 
 /**
  * @author Twan Haverkamp <twan@mailcampaigns.nl>
@@ -31,7 +32,11 @@ class AbandonedCartFactory
     {
         self::validateData($data);
 
-        $cart = unserialize($data['payload']);
+        try {
+            $cart = !empty($data['compressed']) ? CacheValueCompressor::uncompress($data['payload']) : unserialize((string) $data['payload']);
+        } catch (\Throwable $e) {
+            $cart = null;
+        }
 
         if (!$cart instanceof Cart) {
             throw new InvalidCartDataException('cart', Cart::class, $cart);
