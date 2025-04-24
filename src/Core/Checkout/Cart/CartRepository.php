@@ -152,6 +152,12 @@ final class CartRepository
                 ->andWhere($qb->expr()->gte('oc.created_at', ':cartCreatedAt'))
                 ->setParameter('customerId', $data[$key]['customer_id'])
                 ->setParameter('cartCreatedAt', $data[$key]['created_at']);
+
+            $result = $qb->executeQuery()->fetchOne();
+            if($result !== false) {
+                unset($data[$key]);
+                continue;
+            }
         }
 
         return $data;
