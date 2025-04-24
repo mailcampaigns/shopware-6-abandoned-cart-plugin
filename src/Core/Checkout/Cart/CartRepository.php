@@ -9,6 +9,7 @@ use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use MailCampaigns\AbandonedCart\Service\ShopwareVersionHelper;
+use Shopware\Core\Framework\Adapter\Cache\CacheValueCompressor;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 
 /**
@@ -52,7 +53,7 @@ final class CartRepository
 
         $field = $this->payloadExists() ? 'payload' : 'cart';
         if($this->versionHelper->getMajorMinorShopwareVersion() === '6.5') {
-            $qb->select("c.token, c.$field AS payload, c.created_at, c.updated_at AS c_updated_at, ac.updated_at AS ac_updated_at")
+            $qb->select("c.token, c.$field AS payload, c.compressed, c.created_at, c.updated_at AS c_updated_at, ac.updated_at AS ac_updated_at")
                 ->from('cart', 'c')
                 ->leftJoin('c', 'abandoned_cart', 'ac', 'c.token = ac.cart_token')
                 ->where($qb->expr()->in('c.token', ':tokens'))
@@ -72,7 +73,7 @@ final class CartRepository
                 );
             }
         } else if($this->versionHelper->getMajorMinorShopwareVersion() === '6.6') {
-            $qb->select("c.token, c.$field AS payload, c.created_at, ac.updated_at")
+            $qb->select("c.token, c.$field AS payload, c.compressed, c.created_at, ac.updated_at")
                 ->from('cart', 'c')
                 ->leftJoin('c', 'abandoned_cart', 'ac', 'c.token = ac.cart_token')
                 ->where($qb->expr()->in('c.token', ':tokens'))
@@ -91,23 +92,26 @@ final class CartRepository
 
         $data = $qb->executeQuery()->fetchAllAssociative();
 
-        // Return only carts with a customer ID.
-        $data = array_filter($data, function ($cart) {
-            $cart = unserialize($cart['payload']);
+        foreach($data as $key => $cart) {
+            try {
+                $cart = !empty($cart['compressed']) ? CacheValueCompressor::uncompress($cart['payload']) : unserialize((string) $cart['payload']);
+            } catch (\Throwable $e) {
+                $cart = null;
+            }
+
+            if (!$cart instanceof \Shopware\Core\Checkout\Cart\Cart) {
+                continue;
+            }
 
             $firstAddress = $cart->getDeliveries()->getAddresses()->first();
             if($firstAddress) {
                 $customerId = $firstAddress->getCustomerId();
-                if($customerId) {
-                    return true;
+                if(!$customerId) {
+                    // Return only carts with a customer ID.
+                    unset($data[$key]);
+                    continue;
                 }
             }
-            return false;
-        });
-
-        // Loop over results
-        foreach($data as $key => $cart) {
-            $cart = unserialize($cart['payload']);
 
             // Remove carts that are marked as recalculated since they can be considered as garbage
             if($cart->getBehavior()->isRecalculation()) {
