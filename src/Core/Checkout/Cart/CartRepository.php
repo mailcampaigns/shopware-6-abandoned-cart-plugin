@@ -103,14 +103,11 @@ final class CartRepository
                 continue;
             }
 
-            $firstAddress = $cart->getDeliveries()->getAddresses()->first();
-            if($firstAddress) {
-                $customerId = $firstAddress->getCustomerId();
-                if(!$customerId) {
-                    // Return only carts with a customer ID.
-                    unset($data[$key]);
-                    continue;
-                }
+            $customerId = $cart->getDeliveries()->getAddresses()->first()?->getCustomerId();
+            if(!$customerId) {
+                // Return only carts with a customer ID.
+                unset($data[$key]);
+                continue;
             }
 
             // Remove carts that are marked as recalculated since they can be considered as garbage
