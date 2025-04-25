@@ -54,6 +54,7 @@ final class AbandonedCartManager
                     'cartToken' => $abandonedCart->getCartToken(),
                     'price' => $abandonedCart->getPrice(),
                     'customerId' => $abandonedCart->getCustomerId(),
+                    'salesChannelId' => $abandonedCart->getSalesChannelId(),
                 ],
             ], $this->context);
 

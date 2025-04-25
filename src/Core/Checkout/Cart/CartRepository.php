@@ -55,6 +55,7 @@ final class CartRepository
         $field = $this->payloadExists() ? 'payload' : 'cart';
         if($this->versionHelper->getMajorMinorShopwareVersion() === '6.5') {
             $qb->select("c.token, c.$field AS payload, c.created_at, c.updated_at AS c_updated_at, ac.updated_at AS ac_updated_at")
+                ->addSelect('c.sales_channel_id')
                 ->addSelect('LOWER(HEX(c.customer_id)) AS customer_id')
                 ->addSelect('c.compressed')
                 ->addSelect('c.price')
@@ -78,6 +79,7 @@ final class CartRepository
             }
         } else if($this->versionHelper->getMajorMinorShopwareVersion() === '6.6') {
             $qb->select("c.token, c.$field AS payload, c.created_at, ac.updated_at")
+                ->addSelect('c.sales_channel_id')
                 ->addSelect('LOWER(HEX(c.customer_id)) AS customer_id')
                 ->addSelect('c.compressed')
                 ->addSelect('c.price')
@@ -116,6 +118,8 @@ final class CartRepository
                 unset($data[$key]);
                 continue;
             }
+
+            $data[$key]['sales_channel_id'] = bin2hex($data[$key]['sales_channel_id']);
 
             if($retrieveUpdated) {
                 /** @var ModificationTimeStruct|null $modificationTime */

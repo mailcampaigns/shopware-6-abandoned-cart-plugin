@@ -7,6 +7,7 @@ namespace MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart;
 use Shopware\Core\Checkout\Customer\CustomerEntity;
 use Shopware\Core\Framework\DataAbstractionLayer\Entity;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityIdTrait;
+use Shopware\Core\System\SalesChannel\SalesChannelEntity;
 
 /**
  * @author Twan Haverkamp <twan@mailcampaigns.nl>
@@ -18,7 +19,9 @@ final class AbandonedCartEntity extends Entity
     protected string $cartToken;
     protected float $price;
     protected string $customerId;
+    protected string $salesChannelId;
     protected ?CustomerEntity $customer;
+    protected ?SalesChannelEntity $salesChannel;
 
     public function getCartToken(): string
     {
@@ -50,6 +53,16 @@ final class AbandonedCartEntity extends Entity
         $this->customerId = $customerId;
     }
 
+    public function getSalesChannelId(): string
+    {
+        return $this->salesChannelId;
+    }
+
+    public function setSalesChannelId(string $salesChannelId): void
+    {
+        $this->salesChannelId = $salesChannelId;
+    }
+
     public function getCustomer(): ?CustomerEntity
     {
         return $this->customer;
@@ -59,5 +72,15 @@ final class AbandonedCartEntity extends Entity
     public function setCustomer(CustomerEntity $customer): void
     {
         $this->customer = $customer;
+    }
+
+    public function getSalesChannel(): ?SalesChannelEntity
+    {
+        return $this->salesChannel;
+    }
+
+    public function setSalesChannel(SalesChannelEntity $salesChannel): void
+    {
+        $this->salesChannel = $salesChannel;
     }
 }
