@@ -137,6 +137,27 @@ DELETE /api/abandoned-cart/{id}
 - **PATCH**: Update specific fields of an abandoned cart.
 - **DELETE**: Remove an abandoned cart.
 
+## 📡 Events
+
+The plugin dispatches several events that you can listen to in your custom code:
+
+### AfterCartMarkedAsAbandonedEvent
+Dispatched when a cart is marked as abandoned. Contains:
+- `AbandonedCartEntity`: Newly created abandoned cart entity
+- `array`: Original Shopware cart data
+- `Context`: Shopware context
+
+### AfterAbandonedCartUpdatedEvent
+Dispatched when an abandoned cart is updated. Contains:
+- `AbandonedCartEntity`: Updated abandoned cart entity
+- `array`: Updated Shopware cart data
+- `Context`: Shopware context
+
+### AfterAbandonedCartDeletedEvent
+Dispatched when an abandoned cart is deleted. Contains:
+- `string`: ID of the deleted abandoned cart
+- `string`: Token of the deleted cart
+- `Context`: Shopware context
 
 ## 📦 Release Overview
 

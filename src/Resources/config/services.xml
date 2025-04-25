@@ -17,6 +17,7 @@
         <service id="MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager">
             <argument type="service" id="MailCampaigns\AbandonedCart\Core\Checkout\Cart\CartRepository" />
             <argument type="service" id="abandoned_cart.repository" />
+            <argument type="service" id="event_dispatcher"/>
         </service>
 
         <service id="MailCampaigns\AbandonedCart\Command\DeleteAbandonedCartCommand">
