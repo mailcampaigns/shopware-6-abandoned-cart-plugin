@@ -45,7 +45,6 @@ final class AbandonedCartDefinition extends EntityDefinition
             (new IdField('id', 'id'))->addFlags(new ApiAware(), new PrimaryKey(), new Required()),
             (new StringField('cart_token', 'cartToken', 50))->addFlags(new ApiAware(), new Required()),
             (new FloatField('price', 'price'))->addFlags(new ApiAware(), new Required()),
-            (new JsonField('line_items', 'lineItems'))->addFlags(new ApiAware(), new Required()),
             (new FkField('customer_id', 'customerId', CustomerDefinition::class))->addFlags(new ApiAware()),
             new ManyToOneAssociationField('customer', 'customer_id', CustomerDefinition::class, 'id'),
         ]);
