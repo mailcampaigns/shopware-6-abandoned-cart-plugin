@@ -175,9 +175,9 @@ final class CartRepository
             FROM abandoned_cart
 
             LEFT JOIN cart ON abandoned_cart.cart_token = cart.token
-                AND cart.`token` IN (:tokens)
 
-            WHERE cart.token IS NULL;
+            WHERE abandoned_cart.cart_token IN (:tokens)
+                AND cart.token IS NULL;
         SQL);
 
         $statement->bindValue('tokens', $abandonedCartTokens);
