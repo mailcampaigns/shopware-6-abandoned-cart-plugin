@@ -66,5 +66,10 @@
         </service>
 
         <service id="MailCampaigns\AbandonedCart\Service\ShopwareVersionHelper" />
+
+        <service id="MailCampaigns\AbandonedCart\Subscriber\CartChangeSubscriber">
+            <argument type="service" id="Shopware\Core\Checkout\Cart\CartPersister"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
     </services>
 </container>
