@@ -34,11 +34,13 @@ final class Migration1725548117CreateAbandonedCartTable extends MigrationStep
                 `price` FLOAT NOT NULL,
                 `line_items` JSON,
                 `customer_id` BINARY(16) NOT NULL,
+                `sales_channel_id` BINARY(16) NOT NULL,
                 `created_at` DATETIME(3) NOT NULL,
                 `updated_at` DATETIME(3),
                 PRIMARY KEY (`id`),
                 UNIQUE KEY (`cart_token`),
-                INDEX (`customer_id`)
+                INDEX (`customer_id`),
+                INDEX (`sales_channel_id`)
             )
             ENGINE = InnoDB
             DEFAULT CHARSET = utf8mb4
