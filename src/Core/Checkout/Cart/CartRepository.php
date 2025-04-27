@@ -110,6 +110,7 @@ final class CartRepository
             }
 
             if (!$cart instanceof \Shopware\Core\Checkout\Cart\Cart) {
+                unset($data[$key]);
                 continue;
             }
 
