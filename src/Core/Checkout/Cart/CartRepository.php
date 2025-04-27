@@ -55,6 +55,8 @@ final class CartRepository
         if($this->versionHelper->getMajorMinorShopwareVersion() === '6.5') {
             $qb->select("c.token, c.$field AS payload, c.compressed, c.created_at, c.updated_at AS c_updated_at, ac.updated_at AS ac_updated_at")
                 ->addSelect('LOWER(HEX(c.customer_id)) AS customer_id')
+                ->addSelect('c.price')
+                ->addSelect('c.line_item_count')
                 ->from('cart', 'c')
                 ->leftJoin('c', 'abandoned_cart', 'ac', 'c.token = ac.cart_token')
                 ->join('c', 'customer', 'customer', 'customer.id = c.customer_id AND customer.active = 1')
@@ -77,6 +79,8 @@ final class CartRepository
         } else if($this->versionHelper->getMajorMinorShopwareVersion() === '6.6') {
             $qb->select("c.token, c.$field AS payload, c.compressed, c.created_at, ac.updated_at")
                 ->addSelect('LOWER(HEX(c.customer_id)) AS customer_id')
+                ->addSelect('c.price')
+                ->addSelect('c.line_item_count')
                 ->from('cart', 'c')
                 ->leftJoin('c', 'abandoned_cart', 'ac', 'c.token = ac.cart_token')
                 ->join('c', 'customer', 'customer', 'customer.id = c.customer_id AND customer.active = 1')
@@ -112,12 +116,6 @@ final class CartRepository
                 unset($data[$key]);
                 continue;
             }
-
-            // Add price to each result
-            $data[$key]['price'] = $cart->getPrice()->getTotalPrice();
-
-            // Add line item count to result
-            $data[$key]['line_item_count'] = count($cart->getLineItems());
 
             // Remove customers that have placed an order after the cart was created
             $qb = $this->connection->createQueryBuilder();
