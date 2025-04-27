@@ -148,23 +148,16 @@ final class CartRepository
     {
         $abandonedCartTokens = $this->getAbandonedCartTokens();
 
-        $statement = $this->connection->prepare(<<<SQL
-            SELECT
-                abandoned_cart.cart_token AS token
-            FROM abandoned_cart
+        $qb = $this->connection->createQueryBuilder();
 
-            LEFT JOIN cart ON abandoned_cart.cart_token = cart.token
+        $qb->select('abandoned_cart.cart_token AS token')
+            ->from('abandoned_cart')
+            ->leftJoin('abandoned_cart', 'cart', 'cart', 'abandoned_cart.cart_token = cart.token')
+            ->where($qb->expr()->in('abandoned_cart.cart_token', ':tokens'))
+            ->andWhere($qb->expr()->isNull('cart.token'))
+            ->setParameter('tokens', $abandonedCartTokens, ArrayParameterType::STRING);
 
-            WHERE abandoned_cart.cart_token IN (:tokens)
-                AND cart.token IS NULL;
-        SQL);
-
-        $statement->bindValue('tokens', $abandonedCartTokens);
-
-        return array_column(
-            $statement->executeQuery()->fetchAllAssociative(),
-            'token'
-        );
+        return $qb->executeQuery()->fetchFirstColumn();
     }
 
     /**
