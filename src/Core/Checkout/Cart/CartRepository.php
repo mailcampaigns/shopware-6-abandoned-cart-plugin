@@ -57,6 +57,7 @@ final class CartRepository
                 ->addSelect('LOWER(HEX(c.customer_id)) AS customer_id')
                 ->from('cart', 'c')
                 ->leftJoin('c', 'abandoned_cart', 'ac', 'c.token = ac.cart_token')
+                ->join('c', 'customer', 'customer', 'customer.id = c.customer_id AND customer.active = 1')
                 ->where($qb->expr()->in('c.token', ':tokens'))
                 ->setParameter('tokens', $abandonedCartTokens, ArrayParameterType::STRING)
                 ->orderBy('c.created_at', 'ASC')
@@ -78,6 +79,7 @@ final class CartRepository
                 ->addSelect('LOWER(HEX(c.customer_id)) AS customer_id')
                 ->from('cart', 'c')
                 ->leftJoin('c', 'abandoned_cart', 'ac', 'c.token = ac.cart_token')
+                ->join('c', 'customer', 'customer', 'customer.id = c.customer_id AND customer.active = 1')
                 ->where($qb->expr()->in('c.token', ':tokens'))
                 ->setParameter('tokens', $abandonedCartTokens, ArrayParameterType::STRING)
                 ->orderBy('c.created_at', 'ASC')
@@ -116,21 +118,6 @@ final class CartRepository
 
             // Add line item count to result
             $data[$key]['line_item_count'] = count($cart->getLineItems());
-
-            // Remove customers that are inactive
-            $qb = $this->connection->createQueryBuilder();
-            $qb->select('c.id')
-                ->from('customer', 'c')
-                ->where($qb->expr()->eq('c.id', ':customerId'))
-                ->andWhere($qb->expr()->eq('c.active', ':active'))
-                ->setParameter('customerId', hex2bin($data[$key]['customer_id']))
-                ->setParameter('active', 1);
-            $result = $qb->executeQuery()->fetchOne();
-
-            if($result === false) {
-                unset($data[$key]);
-                continue;
-            }
 
             // Remove customers that have placed an order after the cart was created
             $qb = $this->connection->createQueryBuilder();
