@@ -54,6 +54,7 @@ final class CartRepository
         $field = $this->payloadExists() ? 'payload' : 'cart';
         if($this->versionHelper->getMajorMinorShopwareVersion() === '6.5') {
             $qb->select("c.token, c.$field AS payload, c.compressed, c.created_at, c.updated_at AS c_updated_at, ac.updated_at AS ac_updated_at")
+                ->addSelect('LOWER(HEX(c.customer_id)) AS customer_id')
                 ->from('cart', 'c')
                 ->leftJoin('c', 'abandoned_cart', 'ac', 'c.token = ac.cart_token')
                 ->where($qb->expr()->in('c.token', ':tokens'))
@@ -74,6 +75,7 @@ final class CartRepository
             }
         } else if($this->versionHelper->getMajorMinorShopwareVersion() === '6.6') {
             $qb->select("c.token, c.$field AS payload, c.compressed, c.created_at, ac.updated_at")
+                ->addSelect('LOWER(HEX(c.customer_id)) AS customer_id')
                 ->from('cart', 'c')
                 ->leftJoin('c', 'abandoned_cart', 'ac', 'c.token = ac.cart_token')
                 ->where($qb->expr()->in('c.token', ':tokens'))
@@ -103,21 +105,11 @@ final class CartRepository
                 continue;
             }
 
-            $customerId = $cart->getDeliveries()->getAddresses()->first()?->getCustomerId();
-            if(!$customerId) {
-                // Return only carts with a customer ID.
-                unset($data[$key]);
-                continue;
-            }
-
             // Remove carts that are marked as recalculated since they can be considered as garbage
             if($cart->getBehavior()->isRecalculation()) {
                 unset($data[$key]);
                 continue;
             }
-
-            // Add customer ID to result
-            $data[$key]['customer_id'] = $cart->getDeliveries()->getAddresses()->first()->getCustomerId();
 
             // Add price to each result
             $data[$key]['price'] = $cart->getPrice()->getTotalPrice();
