@@ -63,7 +63,6 @@ final class CartRepository
                 ->leftJoin('c', 'abandoned_cart', 'ac', 'c.token = ac.cart_token')
                 ->where($qb->expr()->in('c.token', ':tokens'))
                 ->setParameter('tokens', $abandonedCartTokens, ArrayParameterType::STRING)
-                ->orderBy('c.created_at', 'ASC')
                 ->setMaxResults(100);
 
             if (!$retrieveUpdated) { // Not yet marked as abandoned
@@ -87,7 +86,6 @@ final class CartRepository
                 ->leftJoin('c', 'abandoned_cart', 'ac', 'c.token = ac.cart_token')
                 ->where($qb->expr()->in('c.token', ':tokens'))
                 ->setParameter('tokens', $abandonedCartTokens, ArrayParameterType::STRING)
-                ->orderBy('c.created_at', 'ASC')
                 ->setMaxResults(100);
 
             if (!$retrieveUpdated) { // Not yet marked as abandoned
