@@ -21,11 +21,6 @@
             <argument type="service" id="event_dispatcher"/>
         </service>
 
-        <service id="MailCampaigns\AbandonedCart\Command\DeleteAbandonedCartCommand">
-            <argument type="service" id="MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager" />
-            <tag name="console.command"/>
-        </service>
-
         <service id="MailCampaigns\AbandonedCart\Command\MarkAbandonedCartCommand">
             <argument type="service" id="MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager" />
             <tag name="console.command"/>
@@ -34,16 +29,6 @@
         <service id="MailCampaigns\AbandonedCart\Command\UpdateAbandonedCartCommand">
             <argument type="service" id="MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager"/>
             <tag name="console.command"/>
-        </service>
-
-        <service id="MailCampaigns\AbandonedCart\Service\ScheduledTask\DeleteAbandonedCartTask">
-            <tag name="shopware.scheduled.task" />
-        </service>
-
-        <service id="MailCampaigns\AbandonedCart\Service\ScheduledTask\DeleteAbandonedCartTaskHandler">
-            <argument type="service" id="scheduled_task.repository" />
-            <argument type="service" id="MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager" />
-            <tag name="messenger.message_handler" />
         </service>
 
         <service id="MailCampaigns\AbandonedCart\Service\ScheduledTask\UpdateAbandonedCartTask">

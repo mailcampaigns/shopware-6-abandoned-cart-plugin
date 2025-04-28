@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart;
 
 use Doctrine\DBAL\Exception;
-use MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\Event\AfterAbandonedCartDeletedEvent;
 use MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\Event\AfterAbandonedCartUpdatedEvent;
 use MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\Event\AfterCartMarkedAsAbandonedEvent;
 use MailCampaigns\AbandonedCart\Core\Checkout\Cart\CartRepository;
@@ -100,33 +99,6 @@ final class AbandonedCartManager
             }
 
             $cnt++;
-        }
-
-        return $cnt;
-    }
-
-    /**
-     * @return int The number of deleted "abandoned" carts.
-     * @throws Exception
-     */
-    public function cleanUp(): int
-    {
-        $cnt = 0;
-
-        foreach ($this->cartRepository->findOrphanedAbandonedCartTokens() as $token) {
-            $abandonedCartId = $this->findAbandonedCartIdByToken($token);
-
-            if ($abandonedCartId !== null) {
-                $this->abandonedCartRepository->delete([
-                    [
-                        'id' => $abandonedCartId,
-                    ],
-                ], $this->context);
-
-                $this->eventDispatcher->dispatch(new AfterAbandonedCartDeletedEvent($abandonedCartId, $token, $this->context));
-
-                $cnt++;
-            }
         }
 
         return $cnt;

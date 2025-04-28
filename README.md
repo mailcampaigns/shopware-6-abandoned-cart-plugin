@@ -155,12 +155,6 @@ Dispatched when an abandoned cart is updated. Contains:
 - `array`: Updated Shopware cart data
 - `Context`: Shopware context
 
-### AfterAbandonedCartDeletedEvent
-Dispatched when an abandoned cart is deleted. Contains:
-- `string`: ID of the deleted abandoned cart
-- `string`: Token of the deleted cart
-- `Context`: Shopware context
-
 ## 📦 Release Overview
 
 | Plugin Version | Compatible Shopware Versions |
