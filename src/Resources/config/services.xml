@@ -19,6 +19,12 @@
             <argument type="service" id="abandoned_cart.repository" />
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
             <argument type="service" id="event_dispatcher"/>
+            <argument type="service" id="scheduled_task.repository"/>
+        </service>
+
+        <service id="MailCampaigns\AbandonedCart\Command\RelaunchAbandonedCartSchedulerCommand">
+            <argument type="service" id="MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager" />
+            <tag name="console.command"/>
         </service>
 
         <service id="MailCampaigns\AbandonedCart\Command\MarkAbandonedCartCommand">
@@ -29,6 +35,16 @@
         <service id="MailCampaigns\AbandonedCart\Command\UpdateAbandonedCartCommand">
             <argument type="service" id="MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager"/>
             <tag name="console.command"/>
+        </service>
+
+        <service id="MailCampaigns\AbandonedCart\Service\ScheduledTask\RelaunchAbandonedCartSchedulerTask">
+            <tag name="shopware.scheduled.task" />
+        </service>
+
+        <service id="MailCampaigns\AbandonedCart\Service\ScheduledTask\RelaunchAbandonedCartSchedulerTaskHandler">
+            <argument type="service" id="scheduled_task.repository" />
+            <argument type="service" id="MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager" />
+            <tag name="messenger.message_handler" />
         </service>
 
         <service id="MailCampaigns\AbandonedCart\Service\ScheduledTask\UpdateAbandonedCartTask">
