@@ -13,7 +13,11 @@ use Shopware\Core\Framework\Api\Context\SystemSource;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsAnyFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\RangeFilter;
+use Shopware\Core\Framework\MessageQueue\ScheduledTask\ScheduledTaskDefinition;
+use Shopware\Core\Framework\MessageQueue\ScheduledTask\ScheduledTaskEntity;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
@@ -29,6 +33,7 @@ final class AbandonedCartManager
         private readonly EntityRepository $abandonedCartRepository,
         private readonly SystemConfigService $systemConfigService,
         private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly EntityRepository $scheduledTaskRepository
     ) {
         $this->context = new Context(new SystemSource());
     }
@@ -112,5 +117,52 @@ final class AbandonedCartManager
         return $this->abandonedCartRepository
             ->searchIds($criteria, $this->context)
             ->firstId();
+    }
+
+    public function relaunchTasks(): void
+    {
+        $criteria = $this->buildCriteriaForStuckScheduledTasks();
+        $context = Context::createDefaultContext();
+        $tasks = $this->scheduledTaskRepository->search($criteria, $context)->getEntities();
+
+        if (\count($tasks) === 0) {
+            return;
+        }
+
+        /** @var ScheduledTaskEntity $task */
+        foreach ($tasks as $task) {
+            $this->scheduledTaskRepository->update([
+                [
+                    'id' => $task->getId(),
+                    'status' => ScheduledTaskDefinition::STATUS_SCHEDULED,
+                ],
+            ], $context);
+        }
+    }
+
+    private function buildCriteriaForStuckScheduledTasks(): Criteria
+    {
+        $considerTasksAsStuck = (new \DateTime())->modify('-1 hour');
+
+        $criteria = new Criteria();
+        $criteria->addFilter(new EqualsFilter('status', ScheduledTaskDefinition::STATUS_RUNNING));
+        $criteria->addFilter(new EqualsAnyFilter('name', [
+            'mailcampaigns.abandoned_cart.mark',
+            'mailcampaigns.abandoned_cart.update',
+        ]));
+        $criteria->addFilter(new RangeFilter(
+            'updatedAt',
+            [
+                RangeFilter::LT => $considerTasksAsStuck->format(Defaults::STORAGE_DATE_TIME_FORMAT),
+            ]
+        ));
+        $criteria->addFilter(new RangeFilter(
+            'lastExecutionTime',
+            [
+                RangeFilter::LT => $considerTasksAsStuck->format(Defaults::STORAGE_DATE_TIME_FORMAT),
+            ]
+        ));
+
+        return $criteria;
     }
 }
