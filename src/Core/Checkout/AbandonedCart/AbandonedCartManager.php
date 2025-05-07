@@ -21,11 +21,14 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
  */
 final class AbandonedCartManager
 {
+    private Context $context;
+
     public function __construct(
         private readonly CartRepository $cartRepository,
         private readonly EntityRepository $abandonedCartRepository,
         private readonly EventDispatcherInterface $eventDispatcher,
     ) {
+        $this->context = new Context(new SystemSource());
     }
 
     /**
@@ -35,8 +38,6 @@ final class AbandonedCartManager
     public function generate(): int
     {
         $cnt = 0;
-
-        $context = new Context(new SystemSource());
 
         foreach ($this->cartRepository->findAbandonedCartsWithCriteria(false) as $cart) {
             $abandonedCart = AbandonedCartFactory::createFromArray($cart);
@@ -48,9 +49,9 @@ final class AbandonedCartManager
                     'lineItems' => $abandonedCart->getLineItems(),
                     'customerId' => $abandonedCart->getCustomerId(),
                 ],
-            ], $context);
+            ], $this->context);
 
-            $this->eventDispatcher->dispatch(new AfterCartMarkedAsAbandonedEvent($abandonedCart, $cart, $context));
+            $this->eventDispatcher->dispatch(new AfterCartMarkedAsAbandonedEvent($abandonedCart, $cart, $this->context));
 
             $cnt++;
         }
@@ -67,8 +68,6 @@ final class AbandonedCartManager
     {
         $cnt = 0;
 
-        $context = new Context(new SystemSource());
-
         foreach ($this->cartRepository->findAbandonedCartsWithCriteria(true) as $cart) {
             $abandonedCart = AbandonedCartFactory::createFromArray($cart);
 
@@ -83,9 +82,9 @@ final class AbandonedCartManager
                     'price' => $abandonedCart->getPrice(),
                     'lineItems' => $abandonedCart->getLineItems(),
                 ],
-            ], $context);
+            ], $this->context);
 
-            $this->eventDispatcher->dispatch(new AfterAbandonedCartUpdatedEvent($abandonedCart, $cart, $context));
+            $this->eventDispatcher->dispatch(new AfterAbandonedCartUpdatedEvent($abandonedCart, $cart, $this->context));
 
             $cnt++;
         }
@@ -101,8 +100,6 @@ final class AbandonedCartManager
     {
         $cnt = 0;
 
-        $context = new Context(new SystemSource());
-
         foreach ($this->cartRepository->findOrphanedAbandonedCartTokens() as $token) {
             $abandonedCartId = $this->findAbandonedCartIdByToken($token);
 
@@ -111,9 +108,9 @@ final class AbandonedCartManager
                     [
                         'id' => $abandonedCartId,
                     ],
-                ], $context);
+                ], $this->context);
 
-                $this->eventDispatcher->dispatch(new AfterAbandonedCartDeletedEvent($abandonedCartId, $token, $context));
+                $this->eventDispatcher->dispatch(new AfterAbandonedCartDeletedEvent($abandonedCartId, $token, $this->context));
 
                 $cnt++;
             }
@@ -128,7 +125,7 @@ final class AbandonedCartManager
         $criteria->addFilter(new EqualsFilter('cartToken', $token));
 
         return $this->abandonedCartRepository
-            ->searchIds($criteria, new Context(new SystemSource()))
+            ->searchIds($criteria, $this->context)
             ->firstId();
     }
 }
