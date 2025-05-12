@@ -49,6 +49,7 @@ final class CartRepository
         $field = $this->payloadExists() ? 'payload' : 'cart';
         if($this->versionHelper->getMajorMinorShopwareVersion() === '6.5') {
             $qb->select("c.token, c.$field AS payload, c.created_at, c.updated_at AS c_updated_at, ac.updated_at AS ac_updated_at")
+                ->addSelect('LOWER(HEX(c.sales_channel_id)) AS sales_channel_id')
                 ->from('cart', 'c')
                 ->leftJoin('c', 'abandoned_cart', 'ac', 'c.token = ac.cart_token')
                 ->where($qb->expr()->in('c.token', $selectAbandonedCartTokensQuery))
@@ -68,6 +69,7 @@ final class CartRepository
             }
         } else if($this->versionHelper->getMajorMinorShopwareVersion() === '6.6') {
             $qb->select("c.token, c.$field AS payload, c.created_at, ac.updated_at")
+                ->addSelect('LOWER(HEX(c.sales_channel_id)) AS sales_channel_id')
                 ->from('cart', 'c')
                 ->leftJoin('c', 'abandoned_cart', 'ac', 'c.token = ac.cart_token')
                 ->where($qb->expr()->in('c.token', $selectAbandonedCartTokensQuery))
