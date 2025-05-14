@@ -1,4 +1,5 @@
-# 🛒 MailCampaigns - "Abandoned" Cart Plugin for Shopware 6
+# 🛒 Abandoned Cart Plugin for Shopware 6 | [MailCampaigns](https://www.mailcampaigns.nl)
+
 
 ![Shopware 6](https://img.shields.io/badge/Shopware-6.x-blue?logo=shopware)
 ![Plugin Version](https://img.shields.io/github/v/release/mailcampaigns/shopware-6-abandoned-cart-plugin)
