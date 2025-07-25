@@ -53,7 +53,6 @@ final class AbandonedCartManager
                 [
                     'cartToken' => $abandonedCart->getCartToken(),
                     'price' => $abandonedCart->getPrice(),
-                    'lineItems' => $abandonedCart->getLineItems(),
                     'customerId' => $abandonedCart->getCustomerId(),
                 ],
             ], $this->context);
@@ -95,7 +94,6 @@ final class AbandonedCartManager
                 [
                     'id' => $abandonedCartId,
                     'price' => $abandonedCart->getPrice(),
-                    'lineItems' => $abandonedCart->getLineItems(),
                 ],
             ], $this->context);
 

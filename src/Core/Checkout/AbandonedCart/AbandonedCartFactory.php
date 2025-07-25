@@ -45,7 +45,6 @@ class AbandonedCartFactory
         $entity = new AbandonedCartEntity();
         $entity->setCartToken($data['token']);
         $entity->setPrice((float)$data['price']);
-        $entity->setLineItems($cart->getLineItems()->jsonSerialize());
         $entity->setCustomerId($data['customer_id']);
 
         return $entity;

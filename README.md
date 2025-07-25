@@ -101,16 +101,6 @@ GET /api/abandoned-cart?limit=5&page=1
             "attributes": {
                 "cartToken": "aeyBUILGpDFdJQS77WMkQVn6wXgOHgC6",
                 "price": 40.0,
-                "lineItems": [
-                    {
-                        "id": "3ac014f329884b57a2cce5a29f34779c",
-                        "good": true,
-                        "type": "product",
-                        "label": "Main product, free shipping with highlighting",
-                        "quantity": 2,
-                        ...
-                    }
-                ],
                 "customerId": "0195cd14000773d7b6697f79bae4283d",
                 "createdAt": "2025-03-25T11:39:44.661+00:00",
                 "updatedAt": "2025-03-25T15:28:34.982+00:00",
