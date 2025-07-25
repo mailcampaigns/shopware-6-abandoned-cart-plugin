@@ -7,17 +7,17 @@ namespace MailCampaigns\AbandonedCart\Service\ScheduledTask;
 use Shopware\Core\Framework\MessageQueue\ScheduledTask\ScheduledTask;
 
 /**
- * @author Twan Haverkamp <twan@mailcampaigns.nl>
+ * @author Ruslan Belziuk <ruslan@dumka.pro>
  */
-class DeleteAbandonedCartTask extends ScheduledTask
+class RelaunchAbandonedCartSchedulerTask extends ScheduledTask
 {
     public static function getTaskName(): string
     {
-        return 'mailcampaigns.abandoned_cart.delete';
+        return 'mailcampaigns.abandoned_cart.relaunch';
     }
 
     public static function getDefaultInterval(): int
     {
-        return 60;
+        return 300;
     }
 }

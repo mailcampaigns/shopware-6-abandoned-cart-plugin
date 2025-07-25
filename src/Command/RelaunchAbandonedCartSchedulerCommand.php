@@ -12,13 +12,13 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * @author Twan Haverkamp <twan@mailcampaigns.nl>
+ * @author Ruslan Belziuk <ruslan@dumka.pro>
  */
 #[AsCommand(
-    name: 'mailcampaigns:abandoned-cart:delete',
-    description: 'Deletes "abandoned" carts without an existing reference.'
+    name: 'mailcampaigns:abandoned-cart:relaunch',
+    description: 'Relaunch abandoned cart schedules tasks.'
 )]
-final class DeleteAbandonedCartCommand extends Command
+final class RelaunchAbandonedCartSchedulerCommand extends Command
 {
     public function __construct(private AbandonedCartManager $manager, string $name = null)
     {
@@ -30,9 +30,9 @@ final class DeleteAbandonedCartCommand extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output): int
     {
-        $cnt = $this->manager->cleanUp();
+        $this->manager->relaunchTasks();
 
-        $output->writeln("Deleted $cnt \"abandoned\" shopping carts.");
+        $output->writeln("Rescheduled.");
 
         return Command::SUCCESS;
     }

@@ -17,10 +17,12 @@
         <service id="MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager">
             <argument type="service" id="MailCampaigns\AbandonedCart\Core\Checkout\Cart\CartRepository" />
             <argument type="service" id="abandoned_cart.repository" />
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
             <argument type="service" id="event_dispatcher"/>
+            <argument type="service" id="scheduled_task.repository"/>
         </service>
 
-        <service id="MailCampaigns\AbandonedCart\Command\DeleteAbandonedCartCommand">
+        <service id="MailCampaigns\AbandonedCart\Command\RelaunchAbandonedCartSchedulerCommand">
             <argument type="service" id="MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager" />
             <tag name="console.command"/>
         </service>
@@ -35,11 +37,11 @@
             <tag name="console.command"/>
         </service>
 
-        <service id="MailCampaigns\AbandonedCart\Service\ScheduledTask\DeleteAbandonedCartTask">
+        <service id="MailCampaigns\AbandonedCart\Service\ScheduledTask\RelaunchAbandonedCartSchedulerTask">
             <tag name="shopware.scheduled.task" />
         </service>
 
-        <service id="MailCampaigns\AbandonedCart\Service\ScheduledTask\DeleteAbandonedCartTaskHandler">
+        <service id="MailCampaigns\AbandonedCart\Service\ScheduledTask\RelaunchAbandonedCartSchedulerTaskHandler">
             <argument type="service" id="scheduled_task.repository" />
             <argument type="service" id="MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager" />
             <tag name="messenger.message_handler" />
@@ -66,5 +68,10 @@
         </service>
 
         <service id="MailCampaigns\AbandonedCart\Service\ShopwareVersionHelper" />
+
+        <service id="MailCampaigns\AbandonedCart\Subscriber\CartChangeSubscriber">
+            <argument type="service" id="Shopware\Core\Checkout\Cart\CartPersister"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
     </services>
 </container>

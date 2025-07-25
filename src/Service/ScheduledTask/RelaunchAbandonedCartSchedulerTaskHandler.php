@@ -11,10 +11,10 @@ use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
- * @author Twan Haverkamp <twan@mailcampaigns.nl>
+ * @author Ruslan Belziuk <ruslan@dumka.pro>
  */
-#[AsMessageHandler(handles: DeleteAbandonedCartTask::class)]
-final class DeleteAbandonedCartTaskHandler extends ScheduledTaskHandler
+#[AsMessageHandler(handles: RelaunchAbandonedCartSchedulerTask::class)]
+final class RelaunchAbandonedCartSchedulerTaskHandler extends ScheduledTaskHandler
 {
     public function __construct(
         EntityRepository $scheduledTaskRepository,
@@ -28,6 +28,6 @@ final class DeleteAbandonedCartTaskHandler extends ScheduledTaskHandler
      */
     public function run(): void
     {
-        $this->manager->cleanUp();
+        $this->manager->relaunchTasks();
     }
 }
