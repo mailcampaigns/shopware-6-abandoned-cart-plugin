@@ -78,7 +78,6 @@ final class CartRepository
             }
         } else if($this->versionHelper->getMajorMinorShopwareVersion() === '6.6') {
             $qb->select("c.token, c.$field AS payload, c.created_at, ac.updated_at")
-                ->addSelect('LOWER(HEX(c.customer_id)) AS customer_id')
                 ->addSelect('c.compressed')
                 ->addSelect('c.price')
                 ->addSelect('c.line_item_count')
@@ -99,27 +98,43 @@ final class CartRepository
 
         $data = $qb->executeQuery()->fetchAllAssociative();
 
-        foreach($data as $key => $cart) {
+        foreach($data as $key => $row) {
             try {
-                $cart = !empty($cart['compressed']) ? CacheValueCompressor::uncompress($cart['payload']) : unserialize((string) $cart['payload']);
+                $cartObj = !empty($row['compressed']) ? CacheValueCompressor::uncompress($row['payload']) : unserialize((string) $row['payload']);
             } catch (\Throwable $e) {
-                $cart = null;
+                $cartObj = null;
             }
 
-            if (!$cart instanceof \Shopware\Core\Checkout\Cart\Cart) {
+            if (!$cartObj instanceof \Shopware\Core\Checkout\Cart\Cart) {
                 unset($data[$key]);
                 continue;
             }
 
+            // Extract customerId from cart payload for 6.6
+            if($this->versionHelper->getMajorMinorShopwareVersion() === '6.6') {
+                $customerId = null;
+                if (method_exists($cartObj, 'getCustomer')) {
+                    $customer = $cartObj->getCustomer();
+                    if ($customer && method_exists($customer, 'getId')) {
+                        $customerId = $customer->getId();
+                    }
+                }
+                if (!$customerId) {
+                    unset($data[$key]);
+                    continue;
+                }
+                $data[$key]['customer_id'] = $customerId;
+            }
+
             // Remove carts that are marked as recalculated since they can be considered as garbage
-            if($cart->getBehavior()->isRecalculation()) {
+            if($cartObj->getBehavior()->isRecalculation()) {
                 unset($data[$key]);
                 continue;
             }
 
             if($retrieveUpdated) {
                 /** @var ModificationTimeStruct|null $modificationTime */
-                $modificationTime = $cart->getExtension(ModificationTimeStruct::CART_EXTENSION_NAME);
+                $modificationTime = $cartObj->getExtension(ModificationTimeStruct::CART_EXTENSION_NAME);
 
                 $data[$key]['modified_at'] = $modificationTime?->getModifiedAt()?->format(Defaults::STORAGE_DATE_TIME_FORMAT)
                     ?? $data[$key]['c_updated_at']
@@ -181,15 +196,9 @@ final class CartRepository
         else if ($this->versionHelper->getMajorMinorShopwareVersion() === '6.6') {
             $sql = <<<SQL
                 SELECT
-                    SUBSTRING_INDEX(
-                        GROUP_CONCAT(cart.`token` ORDER BY cart.created_at DESC),
-                        ',',
-                        1
-                    ) AS `token`
+                    cart.`token`
                 FROM cart
-                INNER JOIN customer ON customer.id = cart.customer_id AND customer.active = 1
                 WHERE cart.created_at < '{$considerAbandonedAfter->format('Y-m-d H:i:s.v')}'
-                GROUP BY cart.customer_id
             SQL;
         }
         else {
