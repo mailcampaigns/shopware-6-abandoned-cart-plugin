@@ -79,7 +79,6 @@ final class CartRepository
         } else if($this->versionHelper->getMajorMinorShopwareVersion() === '6.6') {
             $qb->select("c.token, c.$field AS payload, c.created_at, ac.updated_at")
                 ->addSelect('c.compressed')
-                ->addSelect('c.line_item_count')
                 ->from('cart', 'c')
                 ->leftJoin('c', 'abandoned_cart', 'ac', 'c.token = ac.cart_token')
                 ->where($qb->expr()->in('c.token', ':tokens'))
@@ -125,6 +124,8 @@ final class CartRepository
                 $data[$key]['customer_id'] = $customerId;
                 // Set price from cart object
                 $data[$key]['price'] = $cartObj->getPrice()?->getTotalPrice();
+                // Set line item count from cart object
+                $data[$key]['line_item_count'] = is_callable([$cartObj, 'getLineItems']) ? count($cartObj->getLineItems()) : 0;
             }
 
             // Remove carts that are marked as recalculated since they can be considered as garbage
