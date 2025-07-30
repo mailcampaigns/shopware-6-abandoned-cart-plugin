@@ -79,7 +79,6 @@ final class CartRepository
         } else if($this->versionHelper->getMajorMinorShopwareVersion() === '6.6') {
             $qb->select("c.token, c.$field AS payload, c.created_at, ac.updated_at")
                 ->addSelect('c.compressed')
-                ->addSelect('c.price')
                 ->addSelect('c.line_item_count')
                 ->from('cart', 'c')
                 ->leftJoin('c', 'abandoned_cart', 'ac', 'c.token = ac.cart_token')
@@ -110,7 +109,7 @@ final class CartRepository
                 continue;
             }
 
-            // Extract customerId from cart payload for 6.6
+            // Extract customerId and price from cart payload for 6.6
             if($this->versionHelper->getMajorMinorShopwareVersion() === '6.6') {
                 $customerId = null;
                 if (method_exists($cartObj, 'getCustomer')) {
@@ -124,6 +123,8 @@ final class CartRepository
                     continue;
                 }
                 $data[$key]['customer_id'] = $customerId;
+                // Set price from cart object
+                $data[$key]['price'] = $cartObj->getPrice()?->getTotalPrice();
             }
 
             // Remove carts that are marked as recalculated since they can be considered as garbage
