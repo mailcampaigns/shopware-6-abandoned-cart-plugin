@@ -8,10 +8,16 @@
             <tag name="shopware.entity.definition" entity="abandoned_cart" />
         </service>
 
+        <service id="MailCampaigns\AbandonedCart\Core\Checkout\Cart\Handler\CartRepositoryHandlerFactory">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="MailCampaigns\AbandonedCart\Service\ShopwareVersionHelper"/>
+            <argument type="service" id="logger" />
+        </service>
+
         <service id="MailCampaigns\AbandonedCart\Core\Checkout\Cart\CartRepository">
             <argument type="service" id="Doctrine\DBAL\Connection"/>
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
-            <argument type="service" id="MailCampaigns\AbandonedCart\Service\ShopwareVersionHelper"/>
+            <argument type="service" id="MailCampaigns\AbandonedCart\Core\Checkout\Cart\Handler\CartRepositoryHandlerFactory"/>
             <argument type="service" id="logger" />
         </service>
 
