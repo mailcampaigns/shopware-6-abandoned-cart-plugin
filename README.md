@@ -69,8 +69,6 @@ Make sure this timeout is **less than** than Shopware's own cart expiration sett
 
 Make sure to give the API user the necessary permissions to access the `/abandoned-cart` endpoint.
 - `abandoned_cart:read` permission to **read** abandoned carts
-- `abandoned_cart:update` permission to **update** abandoned carts
-- `abandoned_cart:delete` permission to **delete** abandoned carts
 
 > 🧠 Abandoned carts are generated using [scheduled tasks] and depend on the [message queue].
 
@@ -123,21 +121,17 @@ GET /api/abandoned-cart?limit=5&page=1
     ...
 }
 ```
-### 🔍 Retrieve, Update, or Delete a Specific Abandoned Cart
+### 🔍 Retrieve a Specific Abandoned Cart
 
-You can interact with a specific abandoned cart using its unique `{id}`.
+You can retrieve details of a specific abandoned cart using its unique `{id}`.
 
 #### Endpoint:
 ```http
 GET /api/abandoned-cart/{id}
-PATCH /api/abandoned-cart/{id}
-DELETE /api/abandoned-cart/{id}
 ```
 
-#### Methods:
+#### Method:
 - **GET**: Retrieve details of a specific abandoned cart.
-- **PATCH**: Update specific fields of an abandoned cart.
-- **DELETE**: Remove an abandoned cart.
 
 ## 📡 Events
 
