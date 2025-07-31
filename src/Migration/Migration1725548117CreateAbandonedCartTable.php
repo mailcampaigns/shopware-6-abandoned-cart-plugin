@@ -51,5 +51,8 @@ final class Migration1725548117CreateAbandonedCartTable extends MigrationStep
      */
     public function updateDestructive(Connection $connection): void
     {
+        $connection->executeStatement(<<<SQL
+            DROP TABLE IF EXISTS `abandoned_cart`;
+        SQL);
     }
 }
