@@ -6,6 +6,7 @@
 ![License](https://img.shields.io/github/license/mailcampaigns/shopware-6-abandoned-cart-plugin)
 
 This [Shopware 6](https://www.shopware.com/en/products/shopware-6/) plugin adds an `/abandoned-cart` API endpoint that allows you to retrieve shopping carts that your customers have left behind.
+> **ℹ️ Note:** By default, Shopware stores shopping carts in the SQL database. For high-throughput scenarios, Shopware supports storing carts in Redis instead of SQL. If your Shopware installation is configured to use Redis for cart storage, this plugin may not be compatible, as it expects carts to be stored in the database. Learn more: [Shopware Cart Storage](https://developer.shopware.com/docs/guides/hosting/performance/cart-storage.html)
 
 After a configured number of **seconds**, a cart can be considered abandoned.  
 It only returns carts of **active known customers** that have **not been converted to an order** yet.
