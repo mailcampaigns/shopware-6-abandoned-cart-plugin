@@ -39,5 +39,14 @@ class Migration1745841283AddCartForeignKey extends MigrationStep
 
     public function updateDestructive(Connection $connection): void
     {
+        $connection->executeStatement(<<<SQL
+            ALTER TABLE `abandoned_cart`
+                DROP FOREIGN KEY `fk.abandoned_cart.cart`;
+        SQL);
+
+        $connection->executeStatement(<<<SQL
+            ALTER TABLE `abandoned_cart`
+                DROP INDEX `fk.abandoned_cart.cart`;
+        SQL);
     }
 }
