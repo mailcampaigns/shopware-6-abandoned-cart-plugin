@@ -30,7 +30,7 @@ class Shopware65CartRepositoryHandler implements CartRepositoryHandlerInterface
         
         $qb->select("c.token, c.$field AS payload, c.created_at, c.updated_at AS c_updated_at, ac.updated_at AS ac_updated_at")
             ->addSelect('LOWER(HEX(c.customer_id)) AS customer_id')
-            ->addSelect('c.compressed')
+            ->addSelect($this->compressedExists() ? 'c.compressed' : '0 AS compressed')
             ->addSelect('c.price')
             ->addSelect('c.line_item_count')
             ->from('cart', 'c')
@@ -52,6 +52,21 @@ class Shopware65CartRepositoryHandler implements CartRepositoryHandlerInterface
         }
 
         return $qb->executeQuery()->fetchAllAssociative();
+    }
+
+    /**
+     * Check whether the `compressed` column exists on the `cart` table.
+     */
+    private function compressedExists(): bool
+    {
+        $statement = $this->connection->prepare(<<<SQL
+            SHOW COLUMNS FROM cart;
+        SQL);
+
+        return in_array('compressed', array_column(
+            $statement->executeQuery()->fetchAllAssociative(),
+            'Field'
+        ));
     }
 
     public function getAbandonedCartTokensQuery(DateTime $considerAbandonedAfter): string
