@@ -159,3 +159,10 @@ For support, contact us at [support@mailcampaigns.nl](mailto:support@mailcampaig
 
 Check all releases:  
 👉 [https://github.com/mailcampaigns/shopware-6-abandoned-cart-plugin/releases](https://github.com/mailcampaigns/shopware-6-abandoned-cart-plugin/releases)
+
+Check out this handy database seeder for seeding test customers and data in your development environment:  
+👉 https://github.com/m-a-x-s-e-e-l-i-g/shopware-6-cart-seeder
+
+Check out Dockware for easily setting up a local Shopware environment:  
+👉 https://docs.dockware.io/use-dockware/first-run
+
