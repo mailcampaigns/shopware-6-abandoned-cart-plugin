@@ -21,7 +21,7 @@ Use this data to send automated cart recovery reminders to increase your convers
 - 👤 Only returns known, non-order customers
 - ⏱️ Configurable timeout in seconds (default: 3600)
 - 🛠️ Compatible with scheduled tasks & message queue
-- ✅ Supports Shopware 6.4 → 6.6
+- ✅ Supports Shopware 6.4 → 6.7
 
 ---
 
@@ -30,10 +30,7 @@ Use this data to send automated cart recovery reminders to increase your convers
 | Shopware Version | Plugin Version | Download |
 |------------------|----------------|----------|
 | 6.4              | 1.7.1          | [🔗 View Release](https://github.com/mailcampaigns/shopware-6-abandoned-cart-plugin/releases/tag/1.7.1) |
-| 6.5              | 3.0.8          | [🔗 View Release](https://github.com/mailcampaigns/shopware-6-abandoned-cart-plugin/releases/tag/3.0.8) |
-| 6.6              | 3.0.8          | [🔗 View Release](https://github.com/mailcampaigns/shopware-6-abandoned-cart-plugin/releases/tag/3.0.8) |
-
-> ✅ Note: Plugin version `3.0.8` supports both Shopware `6.5` and `6.6`.
+| 6.5, 6.6, 6.7    | 3.0.9          | [🔗 View Release](https://github.com/mailcampaigns/shopware-6-abandoned-cart-plugin/releases/tag/3.0.9) |
 
 ---
 
@@ -148,14 +145,6 @@ Dispatched when an abandoned cart is updated. Contains:
 - `AbandonedCartEntity`: Updated abandoned cart entity
 - `array`: Updated Shopware cart data
 - `Context`: Shopware context
-
-## 📦 Release Overview
-
-| Plugin Version | Compatible Shopware Versions |
-|----------------|-------------------------------|
-| 1.7.1          | 6.4                           |
-| 2.0.0          | 6.5                           |
-| 3.0.8          | 6.5, 6.6                      |
 
 ---
 
