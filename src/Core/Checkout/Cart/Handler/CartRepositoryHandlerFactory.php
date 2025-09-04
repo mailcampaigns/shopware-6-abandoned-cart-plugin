@@ -26,7 +26,7 @@ class CartRepositoryHandlerFactory
 
         return match ($version) {
             '6.5' => new Shopware65CartRepositoryHandler($this->connection, $this->logger),
-            '6.6' => new Shopware66CartRepositoryHandler($this->connection, $this->logger),
+            '6.6', '6.7' => new Shopware66CartRepositoryHandler($this->connection, $this->logger), // 6.7 uses same handler as 6.6
             default => throw new \RuntimeException('Unsupported Shopware version ' . $version),
         };
     }

@@ -88,7 +88,7 @@ class Shopware66CartRepositoryHandler implements CartRepositoryHandlerInterface
 
     public function getSupportedVersion(): string
     {
-        return '6.6';
+        return '6.6-6.7'; // Updated to support both 6.6 and 6.7
     }
 
     /**
