@@ -51,6 +51,8 @@
         <service id="MailCampaigns\AbandonedCart\Service\ScheduledTask\RelaunchAbandonedCartSchedulerTaskHandler">
             <argument type="service" id="scheduled_task.repository" />
             <argument type="service" id="MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager" />
+            <argument type="service" id="logger" on-invalid="null" />
+            <argument type="service" id="MailCampaigns\AbandonedCart\Service\ShopwareVersionHelper" on-invalid="null" />
             <tag name="messenger.message_handler" />
         </service>
 
@@ -61,6 +63,8 @@
         <service id="MailCampaigns\AbandonedCart\Service\ScheduledTask\UpdateAbandonedCartTaskHandler">
             <argument type="service" id="scheduled_task.repository" />
             <argument type="service" id="MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager" />
+            <argument type="service" id="logger" on-invalid="null" />
+            <argument type="service" id="MailCampaigns\AbandonedCart\Service\ShopwareVersionHelper" on-invalid="null" />
             <tag name="messenger.message_handler" />
         </service>
 
@@ -71,6 +75,8 @@
         <service id="MailCampaigns\AbandonedCart\Service\ScheduledTask\MarkAbandonedCartTaskHandler">
             <argument type="service" id="scheduled_task.repository" />
             <argument type="service" id="MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager" />
+            <argument type="service" id="logger" on-invalid="null" />
+            <argument type="service" id="MailCampaigns\AbandonedCart\Service\ShopwareVersionHelper" on-invalid="null" />
             <tag name="messenger.message_handler" />
         </service>
 

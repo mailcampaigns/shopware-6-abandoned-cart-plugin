@@ -6,7 +6,8 @@ namespace MailCampaigns\AbandonedCart\Service\ScheduledTask;
 
 use Doctrine\DBAL\Exception;
 use MailCampaigns\AbandonedCart\Core\Checkout\AbandonedCart\AbandonedCartManager;
-use Shopware\Core\Framework\MessageQueue\ScheduledTask\ScheduledTaskHandler;
+use MailCampaigns\AbandonedCart\Service\ShopwareVersionHelper;
+use Psr\Log\LoggerInterface;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -14,13 +15,15 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
  * @author Ruslan Belziuk <ruslan@dumka.pro>
  */
 #[AsMessageHandler(handles: RelaunchAbandonedCartSchedulerTask::class)]
-final class RelaunchAbandonedCartSchedulerTaskHandler extends ScheduledTaskHandler
+final class RelaunchAbandonedCartSchedulerTaskHandler extends AbstractVersionCompatibleScheduledTaskHandler
 {
     public function __construct(
         EntityRepository $scheduledTaskRepository,
-        private readonly AbandonedCartManager $manager
+        private readonly AbandonedCartManager $manager,
+        ?LoggerInterface $exceptionLogger = null,
+        ?ShopwareVersionHelper $versionHelper = null
     ) {
-        parent::__construct($scheduledTaskRepository);
+        parent::__construct($scheduledTaskRepository, $exceptionLogger, $versionHelper);
     }
 
     /**
