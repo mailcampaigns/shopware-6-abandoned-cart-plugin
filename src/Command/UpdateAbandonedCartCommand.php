@@ -19,7 +19,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 final class UpdateAbandonedCartCommand extends Command
 {
-    public function __construct(private AbandonedCartManager $manager, string $name = null)
+    public function __construct(private AbandonedCartManager $manager, ?string $name = null)
     {
         parent::__construct($name);
     }
