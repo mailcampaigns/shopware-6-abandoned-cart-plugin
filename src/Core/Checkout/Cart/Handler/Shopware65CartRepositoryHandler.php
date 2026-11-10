@@ -37,11 +37,13 @@ class Shopware65CartRepositoryHandler implements CartRepositoryHandlerInterface
             ->leftJoin('c', 'abandoned_cart', 'ac', 'c.token = ac.cart_token')
             ->where($qb->expr()->in('c.token', ':tokens'))
             ->setParameter('tokens', $abandonedCartTokens, ArrayParameterType::STRING)
+            ->orderBy('c.token', 'ASC')
             ->setMaxResults(100);
 
         if (!$retrieveUpdated) { // Not yet marked as abandoned
             $qb->andWhere($qb->expr()->isNull('ac.id'));
         } else { // Updated after marked as abandoned
+            $qb->andWhere($qb->expr()->isNotNull('ac.id'));
             $qb->andWhere($qb->expr()->gt('c.updated_at', 'c.created_at'));
             $qb->andWhere(
                 $qb->expr()->or(
