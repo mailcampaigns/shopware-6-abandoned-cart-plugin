@@ -30,7 +30,7 @@ final class CartRepository
 
     /**
      * Finds and returns an array of `cart` records that are considered "abandoned" and meet specific criteria.
-     * 
+     *
      * This method performs the following steps:
      * 1. Retrieves cart records that are not marked as abandoned OR have been updated after being marked as abandoned. Depending on the value of the $retrieveUpdated parameter.
      * 2. Filters carts to include only those with a customer ID.
@@ -38,7 +38,7 @@ final class CartRepository
      * 4. Adds customer ID, total price, and line item count to each cart.
      * 5. Removes carts associated with inactive customers.
      * 6. Removes carts for customers who have placed an order after the cart was created.
-     * 
+     *
      * @param bool $retrieveUpdated Optional parameter to specify whether to retrieve updated abandoned carts.
      *                              If true, retrieves updated abandoned carts. If false, retrieves new abandoned carts.
      *                              Default is false.
@@ -52,43 +52,46 @@ final class CartRepository
             return [];
         }
 
-        $data = $this->handler->buildAbandonedCartsQuery($abandonedCartTokens, $retrieveUpdated);
+        sort($abandonedCartTokens, SORT_STRING);
+        $data = [];
 
-        foreach($data as $key => $row) {
-            try {
-                $cartObj = !empty($row['compressed']) 
-                    ? CacheValueCompressor::uncompress($row['payload']) 
-                    : unserialize((string) $row['payload']);
-            } catch (\Throwable $e) {
-                $this->logger->error('Failed to unserialize cart payload.', ['exception' => $e]);
-                $cartObj = null;
-            }
+        // Rejected carts must not consume the limit or block later candidates.
+        foreach (array_chunk($abandonedCartTokens, 100) as $tokens) {
+            foreach ($this->handler->buildAbandonedCartsQuery($tokens, $retrieveUpdated) as $row) {
+                try {
+                    $cartObj = !empty($row['compressed'])
+                        ? CacheValueCompressor::uncompress($row['payload'])
+                        : unserialize((string) $row['payload']);
+                } catch (\Throwable $e) {
+                    $this->logger->error('Failed to unserialize cart payload.', ['exception' => $e]);
+                    $cartObj = null;
+                }
 
-            if (!$cartObj instanceof \Shopware\Core\Checkout\Cart\Cart) {
-                $this->logger->error('Invalid cart object.', ['cart' => $row['payload']]);
-                unset($data[$key]);
-                continue;
-            }
+                if (!$cartObj instanceof \Shopware\Core\Checkout\Cart\Cart) {
+                    $this->logger->error('Invalid cart object.', ['cart' => $row['payload']]);
+                    continue;
+                }
 
-            // Remove carts that are marked as recalculated since they can be considered as garbage
-            if($cartObj->getBehavior()->isRecalculation()) {
-                unset($data[$key]);
-                continue;
-            }
+                // Remove carts that are marked as recalculated since they can be considered as garbage
+                if($cartObj->getBehavior()->isRecalculation()) {
+                    continue;
+                }
 
-            // Process cart row with version-specific handler
-            $processedRow = $this->handler->processCartRow($row, $cartObj, $retrieveUpdated);
-            if ($processedRow === null) {
-                unset($data[$key]);
-                continue;
-            }
-            
-            $data[$key] = $processedRow;
+                // Process cart row with version-specific handler
+                $processedRow = $this->handler->processCartRow($row, $cartObj, $retrieveUpdated);
+                if ($processedRow === null) {
+                    continue;
+                }
 
-            // Remove carts of customers that have placed an order after the cart was created
-            if ($this->hasCustomerPlacedOrderAfterCart($data[$key])) {
-                unset($data[$key]);
-                continue;
+                // Remove carts of customers that have placed an order after the cart was created
+                if ($this->hasCustomerPlacedOrderAfterCart($processedRow)) {
+                    continue;
+                }
+
+                $data[] = $processedRow;
+                if (count($data) === 100) {
+                    break 2;
+                }
             }
         }
 
